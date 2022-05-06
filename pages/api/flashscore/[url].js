@@ -8,9 +8,8 @@ export default async function getTeamScors(req, res) {
 	try {
 		let url = "https://www.flashscore.co.jp/team/schio/h4Y1lKRQ/";
 		// url = req.query.url
-		test = "gsag"
 
-		// (async () => {
+
 		const options = {
 			// headless: false, // ヘッドレスをオフに
 			// slowMo: 100  // 動作を遅く

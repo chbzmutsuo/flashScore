@@ -3,6 +3,13 @@ import Head from 'next/head'
 import Image from 'next/image'
 
 const Home: NextPage = () => {
+  const testApi = async () => {
+    fetch('api/flashscore/asjgsa')
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data) //////////
+      })
+  }
   return (
     <div className="flex min-h-screen flex-col items-center justify-center py-2">
       <Head>
@@ -11,6 +18,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main className="flex w-full flex-1 flex-col items-center justify-center px-20 text-center">
+        <button onClick={testApi}>SCRAPE</button>
         <h1 className="text-6xl font-bold">
           Welcome to{' '}
           <a className="text-blue-600" href="https://nextjs.org">
