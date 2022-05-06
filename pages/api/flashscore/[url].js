@@ -8,6 +8,7 @@ export default async function getTeamScors(req, res) {
 	try {
 		let url = "https://www.flashscore.co.jp/team/schio/h4Y1lKRQ/";
 		// url = req.query.url
+		test = "gsag"
 
 		// (async () => {
 		const options = {
@@ -23,9 +24,10 @@ export default async function getTeamScors(req, res) {
 			res.json({ html })
 		}, 3000);
 
+
 	} catch (error) {
 		console.error(error)
-		res.status(500).json({ error: error })
+		res.json({ error: error, msg: '障害が発生しました' })
 	}
 }
 
