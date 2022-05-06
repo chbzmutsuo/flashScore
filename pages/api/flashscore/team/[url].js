@@ -12,7 +12,7 @@ export default async function getTeamScors(req, res) {
 
 		// (async () => {
 		const options = {
-			executablePath: "google-chrome-stable",
+			executablePath: "'/path/to/Chrome'",
 			defaultViewport: null,
 
 			// headless: false, // ヘッドレスをオフに
@@ -28,11 +28,10 @@ export default async function getTeamScors(req, res) {
 		setTimeout(async () => {
 			const html = await page.content()
 			console.log({ html })   //////////
-			res.json({ html })
-		}, 2000);
+			return res.json({ html })
+		}, 1000);
 
 
-		return
 
 
 		const parse = async () => {

@@ -4,7 +4,7 @@ import Image from 'next/image'
 
 const Home: NextPage = () => {
   const testApi = async () => {
-    fetch('api/flashscore/asjgsa')
+    fetch('api/flashscore/a')
       .then((res) => res.json())
       .then((data) => {
         console.log(data) //////////
