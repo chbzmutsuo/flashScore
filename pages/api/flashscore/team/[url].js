@@ -12,8 +12,12 @@ export default async function getTeamScors(req, res) {
 
 		// (async () => {
 		const options = {
+			executablePath: "google-chrome-stable",
+			defaultViewport: null,
+
 			// headless: false, // ヘッドレスをオフに
 			// slowMo: 100  // 動作を遅く
+
 		};
 		const browser = await puppeteer.launch(options);
 
