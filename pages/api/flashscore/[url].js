@@ -7,7 +7,7 @@ const puppeteer = require('puppeteer');
 export default async function getTeamScors(req, res) {
 	try {
 		let url = "https://www.flashscore.co.jp/team/schio/h4Y1lKRQ/";
-		url = req.query.url
+		// url = req.query.url
 
 		// (async () => {
 		const options = {
