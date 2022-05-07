@@ -14,15 +14,22 @@ export default async function Index(req, res) {
 	const searchWord = req.query.query[1]
 
 	const AMAZON_URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=206W0TL0OM2N5&qid=1651031081&sprefix=%E7%84%A1%E5%8D%B0%2Caps%2C233&ref=sr_st_price-asc-rank`
-	switch (shopName) {
-		case 'amazon':
-			amazon = await scrapeAmazon(AMAZON_URL);
-			res.json({ amazon })
-			break;
 
-		default:
-			break;
+	try {
+		switch (shopName) {
+			case 'amazon':
+				amazon = await scrapeAmazon(AMAZON_URL);
+				return res.json({ amazon, shopName, searchWord })
+				break;
+			default:
+				break;
+		}
+
+	} catch (e) {
+		console.log(e)
+		return res.status(500).json({ e, msg: 'errorが発生' })
 	}
+
 
 
 
