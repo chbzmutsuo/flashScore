@@ -11,11 +11,7 @@ export default async function Index(req, res) {
 	let items = [];
 	let rakuten, amazon, yahoo, saiyasune
 
-	const encodedUrl = req.query.query[0]
-	// const shopName = req.query.query[0]
-	// const searchWord = req.query.query[1]
-
-	return await axios.get(encodedUrl).then(response => {
+	return await axios.get(encodeURI(req.body.url)).then(response => {
 		const data = response.data
 		return res.json({ data })
 	})
