@@ -9,27 +9,31 @@ const cheerio = require('cheerio');
 
 export default async function Index(req, res) {
 	let items = [];
-	let rakuten, amazon, yahoo, saiyasune
+	let data;
+	const shopName = req.query.query[0]
+	const searchWord = req.query.query[1]
 
-	return await axios.get(encodeURI(req.body.url)).then(response => {
-		const data = response.data
-		return res.json({ data })
-	})
-
-
-
-	const AMAZON_URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=206W0TL0OM2N5&qid=1651031081&sprefix=%E7%84%A1%E5%8D%B0%2Caps%2C233&ref=sr_st_price-asc-rank`
 
 	try {
 		switch (shopName) {
 			case 'amazon':
-				amazon = await scrapeAmazon(AMAZON_URL);
-				return res.json({ amazon, shopName, searchWord })
+				data = await scrapeAmazon(searchWord);
+				return res.json({ data, shopName, searchWord })
 				break;
-			default:
+			case 'rakuten':
+				data = await scrapeRakuten(searchWord);
+				return res.json({ data, shopName, searchWord })
 				break;
-		}
+			case 'yamada':
+				data = await scrapeYamada(searchWord);
+				return res.json({ data, shopName, searchWord })
+				break;
 
+
+
+
+			// default: break;
+		}
 	} catch (e) {
 		console.log(e)
 		return res.status(500).json({ e, msg: 'errorが発生' })
@@ -38,8 +42,6 @@ export default async function Index(req, res) {
 
 
 
-
-	const RAKUTEN_URL = `https://search.rakuten.co.jp/search/mall/${encodeURI(searchWord)}/?s=11`
 
 
 
@@ -99,8 +101,37 @@ const scrapeSaiyasune = async (URL) => {
 	})
 		.catch(error => { console.error(error); return { msg: error } })
 }
+/**山田 */
+const scrapeYamada = async (searchWord) => {
+	const URL = `https://www.yamada-denkiweb.com/search/${encodeURI(searchWord)}/?category=all&searchbox=1`
+
+	let items = [];
+	return await axios.get(URL).then(response => {
+		const htmlParaser = response.data;
+		const $ = cheerio.load(htmlParaser)
+		//繰り返し
+		$('.tiles.tiles--row', htmlParaser).each(function () {
+			let title, href, price, imageUrl;
+			const yamaadItem = $(this);
+			title = yamaadItem.find('a.links-product').text();
+			price = yamaadItem.find('p.price').text();
+			price = price.replace("¥", '').replace(",", '')
+			href = yamaadItem.find('a.links-product').attr('href');
+			href = `https://www.yamada-denkiweb.com${href}`
+			items.push({ title, price, href })
+		});
+
+		let removeNoPrice = removeNoPriceItem(items)
+		return sortByPrice(removeNoPrice)
+	})
+		.catch(error => { console.error(error); return { msg: 'error' } })
+}
+
 /**楽天を検索 */
-const scrapeRakuten = async (URL) => {
+const scrapeRakuten = async (searchWord) => {
+
+	const URL = `https://search.rakuten.co.jp/search/mall/${encodeURI(searchWord)}/?s=11`
+
 	let items = [];
 	return await axios.get(URL).then(response => {
 		const htmlParaser = response.data;
@@ -124,8 +155,9 @@ const scrapeRakuten = async (URL) => {
 }
 
 /**Amazonを検索 */
-const scrapeAmazon = async (URL) => {
-	console.log(URL)   //////////
+const scrapeAmazon = async (searchWord) => {
+	const URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=206W0TL0OM2N5&qid=1651031081&sprefix=%E7%84%A1%E5%8D%B0%2Caps%2C233&ref=sr_st_price-asc-rank`
+
 	let items = [];
 	return await axios.get(URL).then(response => {
 		const htmlParaser = response.data;
