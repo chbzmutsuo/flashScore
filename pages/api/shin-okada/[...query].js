@@ -9,22 +9,41 @@ const cheerio = require('cheerio');
 
 export default async function Index(req, res) {
 	let items = [];
-	let rakuten, amazon, yahoo
-	// const searchWord = req.body.searchWord;
-	const searchWord = req.query.url;
+	let rakuten, amazon, yahoo, saiyasune
+	const shopName = req.query.query[0]
+	const searchWord = req.query.query[1]
+
+	const AMAZON_URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=206W0TL0OM2N5&qid=1651031081&sprefix=%E7%84%A1%E5%8D%B0%2Caps%2C233&ref=sr_st_price-asc-rank`
+	switch (shopName) {
+		case 'amazon':
+			amazon = await scrapeAmazon(AMAZON_URL);
+			res.json({ amazon })
+			break;
+
+		default:
+			break;
+	}
+
+
+
 
 	const RAKUTEN_URL = `https://search.rakuten.co.jp/search/mall/${encodeURI(searchWord)}/?s=11`
 
-	const AMAZON_URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=206W0TL0OM2N5&qid=1651031081&sprefix=%E7%84%A1%E5%8D%B0%2Caps%2C233&ref=sr_st_price-asc-rank`
+
 
 	const YAHOO_URL = `https://shopping.yahoo.co.jp/search?p=${encodeURI(searchWord)}&tab_ex=commerce&area=13&X=2&sc_i=shp_pc_search_sort_sortitem`
 
+	const SAIYASUNE_URL = `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
 
-	amazon = await scrapeAmazon(AMAZON_URL);
-	yahoo = await scrapeYahoo(YAHOO_URL);
-	rakuten = await scrapeRakuten(RAKUTEN_URL);
 
-	return res.status(200).json({ rakuten, amazon, yahoo },)
+
+
+	// saiyasune = await scrapeSaiyasune(AMAZON_URL);
+
+	// yahoo = await scrapeYahoo(YAHOO_URL);
+	// rakuten = await scrapeRakuten(RAKUTEN_URL);
+
+	return res.status(200).json({ rakuten, amazon, yahoo, saiyasune },)
 }
 
 
@@ -45,11 +64,35 @@ function removeNoPriceItem(items) {
 
 
 
+/**最安値ドットコム */
+const scrapeSaiyasune = async (URL) => {
+	let items = [];
+	return await axios.get(URL).then(response => {
+		const htmlParaser = response.data;
+		const $ = cheerio.load(htmlParaser)
+		//繰り返し
+		$('div', htmlParaser).each(function () {
+			console.log($(this).text())
+			let title, href, price, imageUrl;
+			title = $(this).find('.title').text()
+			price = $(this).find('.important').text();
+			price = Number(price.replace(',', "").replace('円', ""))
+			href = $(this).find('a', '.title').attr('href')
+			imageUrl = $(this).find('img', '.imageUrl_verticallyaligned').attr('src')
+			items.push({ title, price, href, imageUrl })
+		})
+
+		let removeNoPrice = removeNoPriceItem(items)
+		return sortByPrice(removeNoPrice)
+	})
+		.catch(error => { console.error(error); return { msg: error } })
+}
 /**楽天を検索 */
 const scrapeRakuten = async (URL) => {
 	let items = [];
 	return await axios.get(URL).then(response => {
 		const htmlParaser = response.data;
+
 		const $ = cheerio.load(htmlParaser)
 		//繰り返し
 		$('.searchresultitem', htmlParaser).each(function () {
