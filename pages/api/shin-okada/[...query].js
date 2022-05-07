@@ -10,8 +10,20 @@ const cheerio = require('cheerio');
 export default async function Index(req, res) {
 	let items = [];
 	let rakuten, amazon, yahoo, saiyasune
-	const shopName = req.query.query[0]
-	const searchWord = req.query.query[1]
+
+	const encodedUrl = req.query.query[0]
+	// const shopName = req.query.query[0]
+	// const searchWord = req.query.query[1]
+
+	axios.get(encodedUrl).then(response => {
+		const data = response.data
+		return res.json({ data })
+	})
+
+
+	return
+
+
 
 	const AMAZON_URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=206W0TL0OM2N5&qid=1651031081&sprefix=%E7%84%A1%E5%8D%B0%2Caps%2C233&ref=sr_st_price-asc-rank`
 
