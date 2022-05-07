@@ -7,6 +7,7 @@ const puppeteer = require('puppeteer');
 
 
 export default async function getTeamScors(req, res) {
+	let result = [];
 	try {
 		const url = "https://www.flashscore.co.jp/team/schio/h4Y1lKRQ/";
 
@@ -21,47 +22,50 @@ export default async function getTeamScors(req, res) {
 		};
 		const browser = await puppeteer.launch(options);
 
+		return res.json({ browser })
+
+
+
 
 		const page = await browser.newPage();
+		result.push({ page })
 		await page.goto(url);
 
 		setTimeout(async () => {
 			const html = await page.content()
-			console.log({ html })   //////////
-			return res.json({ html })
+			return res.json({ html, result })
 		}, 1000);
 
 
 
 
-		const parse = async () => {
-			const elems = await page.$$('div.event__match');
-			let result = [];
+		// const parse = async () => {
+		// 	const elems = await page.$$('div.event__match');
+		// 	let result = [];
 
-			let i = 0;
-			elems.forEach(async elem => {
-				let home, away, homeScore, awayScore, winLose
-				let text = await getText(elem);
+		// 	let i = 0;
+		// 	elems.forEach(async elem => {
+		// 		let home, away, homeScore, awayScore, winLose
+		// 		let text = await getText(elem);
 
-				// homeElems = homeElems[0]
-				home = await getTextFromElementArray(elem, "div.event__participant--home")
-				away = await getTextFromElementArray(elem, "div.event__participant--away")
-				homeScore = await getTextFromElementArray(elem, "div.event__score--home")
-				awayScore = await getTextFromElementArray(elem, "div.event__score--away")
-				winLose = await getTextFromElementArray(elem, "span.wld")
+		// 		// homeElems = homeElems[0]
+		// 		home = await getTextFromElementArray(elem, "div.event__participant--home")
+		// 		away = await getTextFromElementArray(elem, "div.event__participant--away")
+		// 		homeScore = await getTextFromElementArray(elem, "div.event__score--home")
+		// 		awayScore = await getTextFromElementArray(elem, "div.event__score--away")
+		// 		winLose = await getTextFromElementArray(elem, "span.wld")
 
-				result.push({ home, away, homeScore, awayScore, winLose })
+		// 		result.push({ home, away, homeScore, awayScore, winLose })
 
-			})
-			return result;
-		}
+		// 	})
+		// 	return result;
+		// }
 
-		setTimeout(async () => {
-			const data = await parse();
-			console.log({ data })   //////////
-
-		}
-			, 2000);
+		// setTimeout(async () => {
+		// 	const data = await parse();
+		// 	console.log({ data })   //////////
+		// }
+		// 	, 2000);
 
 		// await browser.close();
 		// setInterval(() => {
@@ -71,7 +75,7 @@ export default async function getTeamScors(req, res) {
 
 	} catch (error) {
 		console.error(error)
-		res.status(500).json({ error: error })
+		res.status(500).json({ error: error, result })
 	}
 }
 

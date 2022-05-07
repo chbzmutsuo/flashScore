@@ -8,9 +8,9 @@ export default async function getTeamScors(req, res) {
 	try {
 		let url = "https://www.flashscore.co.jp/team/schio/h4Y1lKRQ/";
 		// url = req.query.url
-
-
 		const options = {
+			executablePath: "/google-chrome-stable",
+			defaultViewport: null,
 			// headless: false, // ヘッドレスをオフに
 			// slowMo: 100  // 動作を遅く
 		};
@@ -21,12 +21,12 @@ export default async function getTeamScors(req, res) {
 		setTimeout(async () => {
 			const html = await page.content()
 			res.json({ html })
-		}, 3000);
+		}, 100);
 
 
 	} catch (error) {
 		console.error(error)
-		res.json({ error: error, msg: '障害が発生しました' })
+		res.json({ msg: error })
 	}
 }
 
