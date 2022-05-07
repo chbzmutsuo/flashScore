@@ -50,7 +50,7 @@ export default async function Index(req, res) {
 	// yahoo = await scrapeYahoo(YAHOO_URL);
 	// rakuten = await scrapeRakuten(RAKUTEN_URL);
 
-	return res.status(200).json({ rakuten, amazon, yahoo, saiyasune },)
+
 }
 
 
