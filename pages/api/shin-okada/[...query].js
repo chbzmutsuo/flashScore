@@ -29,6 +29,10 @@ export default async function Index(req, res) {
 				return res.json({ data, shopName, searchWord })
 				break;
 
+			default:
+				return res.json({ data, shopName, searchWord })
+				break;
+
 
 
 
