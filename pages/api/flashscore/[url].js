@@ -1,3 +1,4 @@
+import { match } from 'assert';
 
 const puppeteer = require('puppeteer');
 
@@ -6,8 +7,8 @@ const puppeteer = require('puppeteer');
 
 export default async function getTeamScors(req, res) {
 	try {
-		let url = "https://www.flashscore.co.jp/team/schio/h4Y1lKRQ/";
-		// url = req.query.url
+		// let url = "https://www.flashscore.co.jp/team/schio/h4Y1lKRQ/";
+		let url = req.body.url
 		const options = {
 			args: ['--no-sandbox'],
 			// executablePath: "",
@@ -16,14 +17,48 @@ export default async function getTeamScors(req, res) {
 			// slowMo: 100  // 動作を遅く
 		};
 		const browser = await puppeteer.launch(options);
+
 		const page = await browser.newPage();
 		await page.goto(url);
-
+		/**ｈtmlからデータを解析し、JSONにする */
 		setTimeout(async () => {
-			const html = await page.content()
-			await browser.close()
-			return res.json({ html })
+			const matches = await page.$$('div.event__match');
+			try {
+
+				let data = [];
+				for (let i = 0; i < matches.length; i++) {
+					const matches = await page.$$('div.event__match');
+
+
+					const home = await getTextFromElementArray(matches[i], 'div.event__participant--home')
+
+
+
+					data.push({ home, })
+
+					if (i === matches.length - 1) {
+						return res.json({ data })
+					}
+				}
+
+				// let data = [];
+				// const matches = await page.$$('div.event__match');
+
+				// matches.forEach(async match => {
+				// 	const home = await getTextFromElementArray(match, 'div.event__participant--home')
+				// 	data.push({ home, })
+				// 	console.log(data)
+				// 	return res.json({ data })
+				// })
+			} catch (error) {
+				console.error(error)
+				return res.json({ msg: 'errorが起きました' })
+
+			}
+
 		}, 100);
+
+
 
 
 	} catch (error) {
