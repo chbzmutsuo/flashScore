@@ -11,7 +11,7 @@ export default async function getTeamScors(req, res) {
 		const options = {
 			args: ['--no-sandbox'],
 			// executablePath: "",
-			defaultViewport: null,
+			// defaultViewport: null,
 			// headless: false, // ヘッドレスをオフに
 			// slowMo: 100  // 動作を遅く
 		};
