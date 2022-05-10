@@ -10,7 +10,7 @@ export default async function getTeamScors(req, res) {
 		// let url = "https://www.flashscore.co.jp/team/schio/h4Y1lKRQ/";
 		let url = req.body.url
 		const options = {
-			args: ['--no-sandbox'],
+			args: ['--no-sandbox', '-disable-setuid-sandbox'],
 			// executablePath: "",
 			// defaultViewport: null,
 			// headless: false, // ヘッドレスをオフに
