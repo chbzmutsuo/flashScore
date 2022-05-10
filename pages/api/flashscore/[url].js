@@ -9,7 +9,8 @@ export default async function getTeamScors(req, res) {
 		let url = "https://www.flashscore.co.jp/team/schio/h4Y1lKRQ/";
 		// url = req.query.url
 		const options = {
-			executablePath: "",
+			args: ['--no-sandbox'],
+			// executablePath: "",
 			defaultViewport: null,
 			// headless: false, // ヘッドレスをオフに
 			// slowMo: 100  // 動作を遅く
