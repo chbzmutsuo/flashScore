@@ -17,7 +17,6 @@ export default async function getTeamScors(req, res) {
 			// slowMo: 100  // 動作を遅く
 		};
 		const browser = await puppeteer.launch(options);
-
 		const page = await browser.newPage();
 		await page.goto(url);
 		/**ｈtmlからデータを解析し、JSONにする */
