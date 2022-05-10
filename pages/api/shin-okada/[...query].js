@@ -7,11 +7,16 @@ const cheerio = require('cheerio');
 
 
 
+
+
 export default async function Index(req, res) {
 	let items = [];
 	let data;
 	const shopName = req.query.query[0]
 	const searchWord = req.query.query[1]
+
+
+	//shop名と接続先URLを受け取り、shop名で条件分岐して、データを返す
 
 
 	try {
@@ -30,11 +35,8 @@ export default async function Index(req, res) {
 				break;
 
 			default:
-				return res.json({ data, shopName, searchWord })
+				return res.json({ msg: 'shopName parameter unset ' })
 				break;
-
-
-
 
 			// default: break;
 		}
