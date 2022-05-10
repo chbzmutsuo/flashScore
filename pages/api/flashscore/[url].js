@@ -27,15 +27,19 @@ export default async function getTeamScors(req, res) {
 				let data = [];
 				for (let i = 0; i < matches.length; i++) {
 					const matches = await page.$$('div.event__match');
-
-
 					const home = await getTextFromElementArray(matches[i], 'div.event__participant--home')
+					const away = await getTextFromElementArray(matches[i], 'div.event__participant--away')
+					const eventTime = await getTextFromElementArray(matches[i], 'div.event__time')
 
 
+					const wld = await getTextFromElementArray(matches[i], 'span.wld')
 
-					data.push({ home, })
+					const homeScore = await getTextFromElementArray(matches[i], 'div.event__score--home')
+					const awatScore = await getTextFromElementArray(matches[i], 'div.event__score--away')
+					data.push({ home, away, eventTime, wld, homeScore, awatScore, })
 
 					if (i === matches.length - 1) {
+						await browser.close()
 						return res.json({ data })
 					}
 				}
@@ -51,6 +55,7 @@ export default async function getTeamScors(req, res) {
 				// })
 			} catch (error) {
 				console.error(error)
+				await browser.close()
 				return res.json({ msg: 'errorが起きました' })
 
 			}
