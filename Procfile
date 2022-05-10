@@ -1,1 +1,1 @@
-web: scrapingApi
+npx next start -p $PORT
