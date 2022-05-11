@@ -9,6 +9,12 @@ const cheerio = require('cheerio');
 
 
 
+
+
+
+
+
+
 export default async function Index(req, res) {
 	let items = [];
 	let data;
@@ -16,7 +22,41 @@ export default async function Index(req, res) {
 	const searchWord = req.query.query[1]
 
 
+
+	const puppeteer = require('puppeteer');
+	const options = {
+		args: ['--no-sandbox', '-disable-setuid-sandbox'],
+	};
+	const browser = await puppeteer.launch(options);
+	const page = await browser.newPage();
+
+	//データの取得
+	const URL = `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
+	await page.goto(URL);
+
+	setTimeout(async () => {
+		console.log('url get')
+		const saiyasuneItemWrappers = await page.$$('div')
+
+		console.log(saiyasuneItemWrappers.length)
+
+
+		for (let i = 0; i < saiyasuneItemWrappers.length; i++) {
+			const item = saiyasuneItemWrappers[i]
+			const json = await item.getProperty('textContent')
+			// console.log(await json.jsonValue())   //////////
+		}
+
+		return res.json({ shopName, searchWord, items, URL })
+	}, 1000)
+
+
+
+
+
+
 	//shop名と接続先URLを受け取り、shop名で条件分岐して、データを返す
+
 
 	try {
 		switch (shopName) {
@@ -28,23 +68,13 @@ export default async function Index(req, res) {
 				data = await scrapeRakuten(searchWord);
 				return res.json({ data, shopName, searchWord })
 				break;
+			case 'saiyasune':
 
-			//最安値はiframのため入手不可能
-			// case 'saiyasune':
-			// 	data = await scrapeSaiyasune(searchWord);
-			// 	return res.json({ data, shopName, searchWord })
-			// 	break;
-
-
-			case 'hobbyStock':
-				data = await scrapehobbyStock(searchWord);
+				data = await scrapeSaiyasune(searchWord);
 				return res.json({ data, shopName, searchWord })
 				break;
 
-			case 'hobbySearch':
-				data = await scrapehobbySearch(searchWord);
-				return res.json({ data, shopName, searchWord })
-				break;
+
 			case 'yamada':
 				data = await scrapeYamada(searchWord);
 				return res.json({ data, shopName, searchWord })
@@ -102,16 +132,6 @@ function removeNoPriceItem(items) {
 
 /**最安値ドットコム */
 const scrapeSaiyasune = async (searchWord) => {
-	const iframeSrc = "https://www.saiyasune-if3.com/index.php?sai_price=&ik_kw=4549980493106&jancode=&ik_pr1=&ik_pr2=&ik_st=2&rcate=&ik_e_sp=&ik_e_ol=&item_code="
-	axios.get(iframeSrc).then(response => {
-		const htmlParaser = response.data;
-		console.log(htmlParaser)   //////////
-	})
-
-	return
-
-
-
 	const URL = `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
 	let items = [];
 	return await axios.get(URL).then(response => {
@@ -119,10 +139,7 @@ const scrapeSaiyasune = async (searchWord) => {
 		const $ = cheerio.load(htmlParaser)
 		console.log(htmlParaser)
 		//繰り返し
-		$('iframe', htmlParaser).each(function () {
-			const attr = $(this).attr("src");
-
-			console.log({ attr })   //////////
+		$('div', htmlParaser).each(function () {
 			let title, href, price, imageUrl;
 			title = $(this).find('.title').text()
 			price = $(this).find('.important').text();
@@ -136,66 +153,6 @@ const scrapeSaiyasune = async (searchWord) => {
 		return sortByPrice(removeNoPrice)
 	})
 		.catch(error => { console.error(error); return { msg: error } })
-}
-
-
-
-/**ホビーストック */
-const scrapehobbyStock = async (searchWord) => {
-	const URL = `https://www.hobbystock.jp/groups?keyword=${encodeURI(searchWord)}`
-
-	let items = [];
-	return await axios.get(URL).then(response => {
-		const htmlParaser = response.data;
-		const $ = cheerio.load(htmlParaser)
-		//繰り返し
-		$('.animate_item', htmlParaser).each(function () {
-			let title, href, price, imageUrl;
-			const yamaadItem = $(this);
-			title = yamaadItem.find('h3.name').text();
-			price = yamaadItem.find('ins').text();
-			price = parseInt(price.replace("¥", '').replace(",", '').replace("円", ''))
-			href = yamaadItem.find('a').attr('href');
-			href = `https://www.hobbystock.jp${href}`
-			items.push({ title, price, href })
-		});
-
-		console.log(items)
-
-		let removeNoPrice = removeNoPriceItem(items)
-		return sortByPrice(removeNoPrice)
-	})
-		.catch(error => { console.error(error); return { msg: 'error' } })
-}
-/**ホビーサーチ */
-const scrapehobbySearch = async (searchWord) => {
-	const URL = `https://www.1999.co.jp/search?typ1_c=101&cat=&state=&sold=0&searchkey=${encodeURI(searchWord)}&spage=1&sortid=2`
-
-	let items = [];
-	return await axios.get(URL, {
-		maxContentLength: 1000000000000,
-	}).then(response => {
-		const htmlParaser = response.data;
-		const $ = cheerio.load(htmlParaser)
-		//繰り返し
-		$('table.tableFixed', htmlParaser).each(function () {
-			let title, href, price, imageUrl;
-			const yamaadItem = $(this);
-			title = yamaadItem.find('div.ListItemName').find('a').find('span').text()
-			href = yamaadItem.find('div.ListItemName').find('a').attr('href');
-			href = `https://www.1999.co.jp${href}`
-			price = yamaadItem.find('tbody').find('td').find('span').text()
-			price = convertCompletStringToPrice(price)
-
-			if (title !== '') {
-				items.push({ title, price, href })
-			}
-		});
-		console.log(items.length)
-		let removeNoPrice = removeNoPriceItem(items)
-		return sortByPrice(removeNoPrice)
-	})
-		.catch(error => { console.error(error); return { msg: 'error' } })
 }
 /**山田 */
 const scrapeYamada = async (searchWord) => {
@@ -212,8 +169,6 @@ const scrapeYamada = async (searchWord) => {
 			title = yamaadItem.find('a.links-product').text();
 			price = yamaadItem.find('p.price').text();
 			price = price.replace("¥", '').replace(",", '')
-
-
 			href = yamaadItem.find('a.links-product').attr('href');
 			href = `https://www.yamada-denkiweb.com${href}`
 			items.push({ title, price, href })
@@ -303,25 +258,6 @@ const scrapeYahoo = async (URL) => {
 		return sortByPrice(removeNoPrice)
 	}).catch(error => { console.error(error); return { msg: error } })
 }
-
-
-
-
-
-
-/** アーテック発売：シリーズ：販売価格：¥102¥102原作：取得ポイント：1ポイント1ポイント商品コード：073606の中から数値だけを抽出 */
-function convertCompletStringToPrice(string) {
-	const index = string.indexOf("¥");
-	const lastIndex = string.lastIndexOf("¥");
-
-
-	string = string.slice(index + 1, lastIndex)
-	if (string.indexOf('(') > 0) {
-		string = string.slice(0, string.indexOf('('))
-	}
-	return string
-}
-
 
 
 
