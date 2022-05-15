@@ -6,15 +6,6 @@ const cheerio = require('cheerio');
 
 
 
-
-
-
-
-
-
-
-
-
 export default async function Index(req, res) {
 	let items = [];
 	let data;
@@ -23,32 +14,30 @@ export default async function Index(req, res) {
 
 
 
-	const puppeteer = require('puppeteer');
-	const options = {
-		args: ['--no-sandbox', '-disable-setuid-sandbox'],
-	};
-	const browser = await puppeteer.launch(options);
-	const page = await browser.newPage();
+	// const puppeteer = require('puppeteer');
+	// const options = {
+	// 	args: ['--no-sandbox', '-disable-setuid-sandbox'],
+	// };
+	// const browser = await puppeteer.launch(options);
+	// const page = await browser.newPage();
 
 	//データの取得
-	const URL = `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
-	await page.goto(URL);
+	// const URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&crid=206W0TL0OM2N5&qid=1651031081&ref=sr_st_price-asc-rank`
+	// await page.goto(URL);
 
-	setTimeout(async () => {
-		console.log('url get')
-		const saiyasuneItemWrappers = await page.$$('div')
-
-		console.log(saiyasuneItemWrappers.length)
+	// setTimeout(async () => {
+	// 	const saiyasuneItemWrappers = await page.$$('div')
 
 
-		for (let i = 0; i < saiyasuneItemWrappers.length; i++) {
-			const item = saiyasuneItemWrappers[i]
-			const json = await item.getProperty('textContent')
-			// console.log(await json.jsonValue())   //////////
-		}
 
-		return res.json({ shopName, searchWord, items, URL })
-	}, 1000)
+	// 	for (let i = 0; i < saiyasuneItemWrappers.length; i++) {
+	// 		const item = saiyasuneItemWrappers[i]
+	// 		const json = await item.getProperty('textContent')
+	// 		// console.log(await json.jsonValue())   //////////
+	// 	}
+
+	// 	return res.json({ shopName, searchWord, items, URL })
+	// }, 1000)
 
 
 
@@ -62,22 +51,22 @@ export default async function Index(req, res) {
 		switch (shopName) {
 			case 'amazon':
 				data = await scrapeAmazon(searchWord);
-				return res.json({ data, shopName, searchWord })
+				return res.json({ data, shopName, searchWord, query })
 				break;
 			case 'rakuten':
 				data = await scrapeRakuten(searchWord);
-				return res.json({ data, shopName, searchWord })
+				return res.json({ data, shopName, searchWord, query })
 				break;
 			case 'saiyasune':
 
 				data = await scrapeSaiyasune(searchWord);
-				return res.json({ data, shopName, searchWord })
+				return res.json({ data, shopName, searchWord, query })
 				break;
 
 
 			case 'yamada':
 				data = await scrapeYamada(searchWord);
-				return res.json({ data, shopName, searchWord })
+				return res.json({ data, shopName, searchWord, query })
 				break;
 
 			default:
