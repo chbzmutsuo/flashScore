@@ -1,0 +1,36 @@
+.smooth {
+  animation-name: smoothAnime;
+  animation-duration: 2s;
+  animation-fill-mode: forwards;
+  transform-origin: left;
+  opacity: 0;
+}
+
+@keyframes smoothAnime {
+  from {
+    transform: translate3d(0, 100%, 0) skewY(12deg);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate3d(0, 0, 0) skewY(0);
+    opacity: 1;
+  }
+}
+
+.disappear {
+  animation-name: disappear;
+  animation-duration: 20s;
+  animatino-delay: 1s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes disappear {
+  from {
+    opacity: 100;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
