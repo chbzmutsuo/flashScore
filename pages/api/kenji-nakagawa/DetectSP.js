@@ -14,8 +14,8 @@ export default async function DetectSP(req, res) {
 			args: ['--no-sandbox', '-disable-setuid-sandbox'],
 			// executablePath: "",
 			// defaultViewport: null,
-			// headless: false, // ヘッドレスをオフに
-			// slowMo: 500  // 動作を遅く
+			headless: false, // ヘッドレスをオフに
+			slowMo: 100  // 動作を遅く
 		};
 		const device = puppeteer.devices['iPhone 5'];
 
@@ -23,13 +23,13 @@ export default async function DetectSP(req, res) {
 			const page = await browser.newPage();
 			await page.emulate(device);
 			await page.goto(URL);
-			const spImgPath = `public/images/screenshot_sp_${Date.now()}.png`
+			const spImgPath = `public/images/screenshot_sp_${new Date()}.png`
 			await page.screenshot({ path: spImgPath });
 
 
 			const page2 = await browser.newPage();
 			await page2.goto(URL);
-			const pcImgPath = `public/images/screenshot_pc_${Date.now()}.png`
+			const pcImgPath = `public/images/screenshot_pc_${new Date()}.png`
 			await page2.screenshot({ path: pcImgPath });
 
 			browser.close();
