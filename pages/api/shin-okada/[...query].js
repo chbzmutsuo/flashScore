@@ -21,29 +21,43 @@ export default async function Index(req, res) {
 
 	function getNumber() {
 		return new Promise(async function (resolve, reject) {
-			//reqBodyのkeyごとにスクレイピングを実行
-			const keys = Object.keys(body);
-			for (let i = 0; i < keys.length; i++) {
-				const key = keys[i]
-				const data = await tryScraping(key)
-				items.push({ key, data });
-
-
-				if (i === keys.length - 1) { resolve('最後のデータ取得が完了') }
-			}
-			// Object.keys(body).forEach(async key => {
-			// 	console.log({ key })   //////////
-			// 	const data = await tryScraping(key);
+			const data = await tryScraping(shopName)
+			items.push({ key: shopName, data });
+			resolve('データ取得完了');
 
 		});
 	}
-
 	getNumber().then(result => {
 		console.log(result)   //////////
 	}).then(result => {
 		console.log('レスポンスを返します')   //////////
 		return res.json({ items, shopName, searchWord })
 	})
+	// function getNumber() {
+	// 	return new Promise(async function (resolve, reject) {
+	// 		//reqBodyのkeyごとにスクレイピングを実行
+	// 		const keys = Object.keys(body);
+	// 		for (let i = 0; i < keys.length; i++) {
+	// 			const key = keys[i]
+	// 			const data = await tryScraping(key)
+	// 			items.push({ key, data });
+
+
+	// 			if (i === keys.length - 1) { resolve('最後のデータ取得が完了') }
+	// 		}
+	// 		// Object.keys(body).forEach(async key => {
+	// 		// 	console.log({ key })   //////////
+	// 		// 	const data = await tryScraping(key);
+
+	// 	});
+	// }
+
+	// getNumber().then(result => {
+	// 	console.log(result)   //////////
+	// }).then(result => {
+	// 	console.log('レスポンスを返します')   //////////
+	// 	return res.json({ items, shopName, searchWord })
+	// })
 
 
 
@@ -73,11 +87,11 @@ export default async function Index(req, res) {
 
 
 				case 'hobbyStock':
-					const word = items.filter(shop => shop.key === 'amazon')[0]
+					const amazonData = await tryScraping('amazon')
+					items.push({ key: 'amazon', data: amazonData });
+					const word = items.filter(shop => shop.key === 'amazon')[0];
 					const textSearchWord = word.data.data[0].title.slice(0, 30)
 					console.log(`ホビーストックはキーワード検索を行います${textSearchWord}`)   //////////
-
-
 					data = await scrapehobbyStock(textSearchWord);
 					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
 					return data
