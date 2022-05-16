@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
-  reactStrictMode: true,
+	reactStrictMode: true,
+	plugins: {
+		tailwindcss: {},
+		autoprefixer: {},
+	}
 }

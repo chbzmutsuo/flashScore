@@ -1,7 +1,10 @@
 
 import axios from "axios";
 import { resolve } from "path";
+import { off } from "process";
 const cheerio = require('cheerio');
+
+
 
 
 
@@ -14,51 +17,93 @@ export default async function Index(req, res) {
 	let data;
 	const shopName = req.query.query[0]
 	const searchWord = req.query.query[1]
+	const body = req.body
+
+	function getNumber() {
+		return new Promise(async function (resolve, reject) {
+			//reqBodyのkeyごとにスクレイピングを実行
+			const keys = Object.keys(body);
+			for (let i = 0; i < keys.length; i++) {
+				const key = keys[i]
+				const data = await tryScraping(key)
+				items.push({ key, data });
 
 
-	//shop名と接続先URLを受け取り、shop名で条件分岐して、データを返す
+				if (i === keys.length - 1) { resolve('最後のデータ取得が完了') }
+			}
+			// Object.keys(body).forEach(async key => {
+			// 	console.log({ key })   //////////
+			// 	const data = await tryScraping(key);
 
-	try {
-		switch (shopName) {
-			case 'amazon':
-				data = await scrapeAmazon(searchWord);
-				return res.json({ data, shopName, searchWord })
-				break;
-			case 'rakuten':
-				data = await scrapeRakuten(searchWord);
-				return res.json({ data, shopName, searchWord })
-				break;
+		});
+	}
 
-			//最安値はiframのため入手不可能
-			// case 'saiyasune':
-			// 	data = await scrapeSaiyasune(searchWord);
-			// 	return res.json({ data, shopName, searchWord })
-			// 	break;
+	getNumber().then(result => {
+		console.log(result)   //////////
+	}).then(result => {
+		console.log('レスポンスを返します')   //////////
+		return res.json({ items, shopName, searchWord })
+	})
 
 
-			case 'hobbyStock':
-				data = await scrapehobbyStock(searchWord);
-				return res.json({ data, shopName, searchWord })
-				break;
 
-			case 'hobbySearch':
-				data = await scrapehobbySearch(searchWord);
-				return res.json({ data, shopName, searchWord })
-				break;
-			case 'yamada':
-				data = await scrapeYamada(searchWord);
-				return res.json({ data, shopName, searchWord })
-				break;
 
-			default:
-				return res.json({ msg: 'shopName parameter unset ' })
-				break;
 
-			// default: break;
+	/**shop名と接続先URLを受け取り、shop名で条件分岐して、データを返す */
+	async function tryScraping(key) {
+		try {
+			switch (key) {
+				case 'amazon':
+					data = await scrapeAmazon(searchWord);
+					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
+					return data
+					break;
+				case 'rakuten':
+					data = await scrapeRakuten(searchWord);
+					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
+					return data
+					break;
+
+				//最安値はiframのため入手不可能
+				// case 'saiyasune':
+				// 	data = await scrapeSaiyasune(searchWord);
+				// 	console.log(`${key}: ${data.data.length}件のデータ`)   //////////
+				// 	return data
+				// // 	break;
+
+
+				case 'hobbyStock':
+					const word = items.filter(shop => shop.key === 'amazon')[0]
+					const textSearchWord = word.data.data[0].title.slice(0, 30)
+					console.log(`ホビーストックはキーワード検索を行います${textSearchWord}`)   //////////
+
+
+					data = await scrapehobbyStock(textSearchWord);
+					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
+					return data
+					break;
+
+				case 'hobbySearch':
+					data = await scrapehobbySearch(searchWord);
+					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
+					return data
+					break;
+				case 'yamada':
+					data = await scrapeYamada(searchWord);
+					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
+					return data
+					break;
+
+				default:
+					return res.json({ msg: 'shopName parameter unset ' })
+					break;
+
+				// default: break;
+			}
+		} catch (e) {
+			console.log(e)
+			return res.status(500).json({ e, msg: 'errorが発生' })
 		}
-	} catch (e) {
-		console.log(e)
-		return res.status(500).json({ e, msg: 'errorが発生' })
 	}
 
 
@@ -67,17 +112,10 @@ export default async function Index(req, res) {
 
 
 
-	const YAHOO_URL = `https://shopping.yahoo.co.jp/search?p=${encodeURI(searchWord)}&tab_ex=commerce&area=13&X=2&sc_i=shp_pc_search_sort_sortitem`
-
-	const SAIYASUNE_URL = `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
 
 
 
 
-	// saiyasune = await scrapeSaiyasune(AMAZON_URL);
-
-	// yahoo = await scrapeYahoo(YAHOO_URL);
-	// rakuten = await scrapeRakuten(RAKUTEN_URL);
 
 
 }
@@ -103,37 +141,44 @@ function removeNoPriceItem(items) {
 /**最安値ドットコム */
 const scrapeSaiyasune = async (searchWord) => {
 	const iframeSrc = "https://www.saiyasune-if3.com/index.php?sai_price=&ik_kw=4549980493106&jancode=&ik_pr1=&ik_pr2=&ik_st=2&rcate=&ik_e_sp=&ik_e_ol=&item_code="
-	axios.get(iframeSrc).then(response => {
-		const htmlParaser = response.data;
-		console.log(htmlParaser)   //////////
-	})
-
-	return
-
 
 
 	const URL = `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
-	let items = [];
-	return await axios.get(URL).then(response => {
-		const htmlParaser = response.data;
-		const $ = cheerio.load(htmlParaser)
-		console.log(htmlParaser)
-		//繰り返し
-		$('iframe', htmlParaser).each(function () {
-			const attr = $(this).attr("src");
 
-			console.log({ attr })   //////////
+	return await axios.get(URL).then(response => {
+		let items = [];
+		const htmlParaser = response.data;
+		console.log(htmlParaser)   //////////
+		const $ = cheerio.load(htmlParaser)
+		//繰り返し
+		$('.p_sc17', htmlParaser).each(async function () {
+			const attr = $(this).attr("class");
 			let title, href, price, imageUrl;
-			title = $(this).find('.title').text()
-			price = $(this).find('.important').text();
-			price = Number(price.replace(',', "").replace('円', ""))
-			href = $(this).find('a', '.title').attr('href')
-			imageUrl = $(this).find('img', '.imageUrl_verticallyaligned').attr('src')
+			title = $(this).find('.p_sc22').text()
+			href = $(this).find('a').attr('href')
+			href = `https://www.saiyasune.com/${href}`
+			console.log(title)   //////////
 			items.push({ title, price, href, imageUrl })
+			// price = await getPriceFromEachItemPage();
+
+
+			// console.log({ items })   //////////
+
+			// // 個別商品ページに飛ぶ
+			// async function getPriceFromEachItemPage() {
+			// 	return await axios.get(href).then(response => {
+			// 		const eachHtml = response.data
+			// 		const $ = cheerio.load(eachHtml)
+			// 		let price = $('#p_dt25').text();
+			// 		price = price.replace("¥", "").replace(",", "")
+			// 		return price
+			// 	})
+			// }
+
 		})
 
 		let removeNoPrice = removeNoPriceItem(items)
-		return sortByPrice(removeNoPrice)
+		return { url: URL, data: sortByPrice(removeNoPrice) }
 	})
 		.catch(error => { console.error(error); return { msg: error } })
 }
@@ -160,10 +205,9 @@ const scrapehobbyStock = async (searchWord) => {
 			items.push({ title, price, href })
 		});
 
-		console.log(items)
 
 		let removeNoPrice = removeNoPriceItem(items)
-		return sortByPrice(removeNoPrice)
+		return { url: URL, data: sortByPrice(removeNoPrice) }
 	})
 		.catch(error => { console.error(error); return { msg: 'error' } })
 }
@@ -191,9 +235,18 @@ const scrapehobbySearch = async (searchWord) => {
 				items.push({ title, price, href })
 			}
 		});
-		console.log(items.length)
+
+		//１つだけ結果が表示される場合
+		let title, href, price, imageUrl;
+		console.log('個別詳細ページにデータを取得しに行きます')   //////////
+		title = $('.h2_itemDetail').text();
+		href = URL;
+		price = $('span.Price_Dai').text().replace(/¥|,|\n|\(税込\)|代引・銀行・コンビニ|\s|/g, "")
+		items.push({ title, price, href })
+
 		let removeNoPrice = removeNoPriceItem(items)
-		return sortByPrice(removeNoPrice)
+		return { url: URL, data: sortByPrice(removeNoPrice) }
+
 	})
 		.catch(error => { console.error(error); return { msg: 'error' } })
 }
@@ -220,7 +273,7 @@ const scrapeYamada = async (searchWord) => {
 		});
 
 		let removeNoPrice = removeNoPriceItem(items)
-		return sortByPrice(removeNoPrice)
+		return { url: URL, data: sortByPrice(removeNoPrice) }
 	})
 		.catch(error => { console.error(error); return { msg: 'error' } })
 }
@@ -247,7 +300,7 @@ const scrapeRakuten = async (searchWord) => {
 		})
 
 		let removeNoPrice = removeNoPriceItem(items)
-		return sortByPrice(removeNoPrice)
+		return { url: URL, data: sortByPrice(removeNoPrice) }
 	})
 		.catch(error => { console.error(error); return { msg: error } })
 }
@@ -277,7 +330,7 @@ const scrapeAmazon = async (searchWord) => {
 
 		})
 		let removeNoPrice = removeNoPriceItem(items)
-		return sortByPrice(removeNoPrice)
+		return { url: URL, data: sortByPrice(removeNoPrice) }
 	}).catch(error => { console.error(error); return { msg: error } })
 }
 
@@ -300,7 +353,7 @@ const scrapeYahoo = async (URL) => {
 		})
 
 		let removeNoPrice = removeNoPriceItem(items)
-		return sortByPrice(removeNoPrice)
+		return { url: URL, data: sortByPrice(removeNoPrice) }
 	}).catch(error => { console.error(error); return { msg: error } })
 }
 
