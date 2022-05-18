@@ -1,5 +1,6 @@
 
 const cheerio = require('cheerio');
+import axios from 'axios';
 
 
 
@@ -56,6 +57,16 @@ export default async function Index(req, res) {
 					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
 					return data
 					break;
+				case 'yahoo':
+					data = await scrapeYahoo(searchWord);
+					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
+					return data
+					break;
+				case 'hobbySearch':
+					data = await scrapehobbySearch(searchWord);
+					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
+					return data
+					break;
 
 				//最安値はiframのため入手不可能
 				case 'saiyasune':
@@ -66,21 +77,15 @@ export default async function Index(req, res) {
 
 
 				case 'hobbyStock':
-					const amazonData = await tryScraping('amazon')
-					items.push({ key: 'amazon', data: amazonData });
-					const word = items.filter(shop => shop.key === 'amazon')[0];
-					const textSearchWord = word.data.data[0].title.slice(0, 30)
+					let dataFromOtherShop = await tryScraping('amazon')
+					dataFromOtherShop.data.length === 0 ? dataFromOtherShop = await tryScraping('yahoo') : '';
+					let textSearchWord = dataFromOtherShop.data[0]?.title.slice(0, 30)
 					console.log(`ホビーストックはキーワード検索を行います${textSearchWord}`)   //////////
 					data = await scrapehobbyStock(textSearchWord);
 					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
 					return data
 					break;
 
-				case 'hobbySearch':
-					data = await scrapehobbySearch(searchWord);
-					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
-					return data
-					break;
 				case 'yamada':
 					data = await scrapeYamada(searchWord);
 					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
@@ -304,8 +309,8 @@ const scrapeAmazon = async (searchWord) => {
 	const URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=206W0TL0OM2N5&qid=1651031081&sprefix=%E7%84%A1%E5%8D%B0%2Caps%2C233&ref=sr_st_price-asc-rank`
 
 	let items = [];
-	return fetch(URL).then(response => response.text()).then(data => {
-		const htmlParaser = data;
+	return await axios(URL).then(response => {
+		const htmlParaser = response.data;
 		const $ = cheerio.load(htmlParaser)
 		//繰り返し
 		$('.a-section.a-spacing-base', htmlParaser).each(function () {
@@ -320,6 +325,7 @@ const scrapeAmazon = async (searchWord) => {
 			imageUrl = $(this).find('img', '.s-img').attr('src')
 
 			items.push({ title, price, href, imageUrl })
+			console.log({ items })   //////////
 
 
 		})
@@ -330,7 +336,9 @@ const scrapeAmazon = async (searchWord) => {
 
 
 /**yahooを検索 */
-const scrapeYahoo = async (URL) => {
+const scrapeYahoo = async (searchWord) => {
+	const URL = `https://shopping.yahoo.co.jp/search?p=${encodeURI(searchWord)}&tab_ex=commerce&area=13&X=2&sc_i=shp_pc_search_sort_sortitem`
+
 	let items = [];
 	return fetch(URL).then(response => response.text()).then(data => {
 		const htmlParaser = data;
