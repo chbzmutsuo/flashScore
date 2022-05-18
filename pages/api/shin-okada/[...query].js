@@ -183,11 +183,11 @@ const scrapeSaiyasune = async (searchWord) => {
 	const URL = `https://www.saiyasune.com/J${encodeURI(searchWord)}.html`
 	return fetch(URL).then(response => response.text()).then(data => {
 		const eachHtml = data
+		console.log(eachHtml)   //////////
 		let title, href, price, imageUrl;
 		const $ = cheerio.load(eachHtml)
 
 		$('.p_dt136').each(function () {
-
 			if (title === undefined) {
 				title = $(this).text();
 			}
