@@ -5,13 +5,11 @@ import axios from 'axios';
 
 
 
-export const config = {
-	api: {
-		externalResolver: true,
-	},
+const fetchOptions = {
+	headers: {
+		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'
+	}
 }
-
-
 
 
 
@@ -181,7 +179,7 @@ const scrapeSaiyasune = async (searchWord) => {
 	let items = [];
 
 	const URL = `https://www.saiyasune.com/J${encodeURI(searchWord)}.html`
-	return fetch(URL).then(response => response.text()).then(data => {
+	return fetch(URL, fetchOptions).then(response => response.text()).then(data => {
 		const eachHtml = data
 		console.log(eachHtml)   //////////
 		let title, href, price, imageUrl;
