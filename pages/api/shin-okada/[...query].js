@@ -5,13 +5,6 @@ import axios from 'axios';
 
 
 
-const fetchOptions = {
-	headers: {
-		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'
-	}
-}
-
-
 
 
 
@@ -177,6 +170,16 @@ const scrapeSaiyasune = async (searchWord) => {
 	// })
 	// 	.catch(error => { console.error(error); return { msg: error } })
 	let items = [];
+
+
+
+	const fetchOptions = {
+		headers: {
+			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36',
+			Referer: `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
+		}
+	}
+
 
 	const URL = `https://www.saiyasune.com/J${encodeURI(searchWord)}.html`
 	return fetch(URL, fetchOptions).then(response => response.text()).then(data => {
