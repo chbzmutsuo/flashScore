@@ -137,50 +137,72 @@ function removeNoPriceItem(items) {
 
 /**最安値ドットコム */
 const scrapeSaiyasune = async (searchWord) => {
-	const iframeSrc = "https://www.saiyasune-if3.com/index.php?sai_price=&ik_kw=4549980493106&jancode=&ik_pr1=&ik_pr2=&ik_st=2&rcate=&ik_e_sp=&ik_e_ol=&item_code="
+	// const URL = `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
+
+	// return fetch(URL).then(response => response.text()).then(data => {
+	// 	let items = [];
+	// 	const htmlParaser = data;
+	// 	const $ = cheerio.load(htmlParaser)
+	// 	//繰り返し
+
+	// 	return new Promise((resolve, reject) => {
+	// 		const itemCount = $('.p_sc17', htmlParaser).length;
+	// 		$('.p_sc17', htmlParaser).each(async function () {
+	// 			let title, href, price, imageUrl;
+	// 			title = $(this).find('.p_sc22').text()
+	// 			href = $(this).find('a').attr('href')
+	// 			href = `https://www.saiyasune.com/${href}`
+	// 			price = await getPriceFromEachItemPage(href);
+	// 			items.push({ title, price, href, imageUrl })
 
 
-	const URL = `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
+	// 			// 個別商品ページに飛ぶ
+	// 			async function getPriceFromEachItemPage(href) {
+	// 				return fetch(href).then(response => response.text()).then(data => {
+	// 					const eachHtml = data
+	// 					const $ = cheerio.load(eachHtml)
+	// 					let price = $('#p_dt25').text();
+	// 					price = price.replace("¥", "").replace(",", "")
+	// 					return price
+	// 				})
+	// 			}
+	// 			if (items.length === itemCount) {
+	// 				resolve('test');
+	// 			}
+	// 		})
+	// 	}).then(result => {
+	// 		console.log(result)   //////////
+	// 		let removeNoPrice = removeNoPriceItem(items)
+	// 		return { url: URL, data: sortByPrice(removeNoPrice) }
+	// 	})
 
+	// })
+	// 	.catch(error => { console.error(error); return { msg: error } })
+	let items = [];
+
+	const URL = `https://www.saiyasune.com/J${encodeURI(searchWord)}.html`
 	return fetch(URL).then(response => response.text()).then(data => {
-		let items = [];
-		const htmlParaser = data;
-		const $ = cheerio.load(htmlParaser)
-		//繰り返し
+		const eachHtml = data
+		let title, href, price, imageUrl;
+		const $ = cheerio.load(eachHtml)
 
-		return new Promise((resolve, reject) => {
-			const itemCount = $('.p_sc17', htmlParaser).length;
-			$('.p_sc17', htmlParaser).each(async function () {
-				let title, href, price, imageUrl;
-				title = $(this).find('.p_sc22').text()
-				href = $(this).find('a').attr('href')
-				href = `https://www.saiyasune.com/${href}`
-				price = await getPriceFromEachItemPage(href);
-				items.push({ title, price, href, imageUrl })
+		$('.p_dt136').each(function () {
 
-
-				// 個別商品ページに飛ぶ
-				async function getPriceFromEachItemPage(href) {
-					return fetch(href).then(response => response.text()).then(data => {
-						const eachHtml = data
-						const $ = cheerio.load(eachHtml)
-						let price = $('#p_dt25').text();
-						price = price.replace("¥", "").replace(",", "")
-						return price
-					})
-				}
-				if (items.length === itemCount) {
-					resolve('test');
-				}
-			})
-		}).then(result => {
-			console.log(result)   //////////
-			let removeNoPrice = removeNoPriceItem(items)
-			return { url: URL, data: sortByPrice(removeNoPrice) }
+			if (title === undefined) {
+				title = $(this).text();
+			}
 		})
+		href = URL
+		price = $('#p_dt25').text();
+		price = price.replace("¥", "").replace(",", "")
+		items.push({ title, href, price })
+		console.log({ items })   //////////
 
+		let removeNoPrice = removeNoPriceItem(items)
+		return { url: URL, data: sortByPrice(removeNoPrice) }
 	})
-		.catch(error => { console.error(error); return { msg: error } })
+		.catch(error => { console.error(error); return { msg: 'error' } })
+
 }
 
 
@@ -190,8 +212,8 @@ const scrapehobbyStock = async (searchWord) => {
 	const URL = `https://www.hobbystock.jp/groups?keyword=${encodeURI(searchWord)}`
 
 	let items = [];
-	return fetch(URL).then(response => response.text()).then(data => {
-		const htmlParaser = data;
+	return axios.get(URL).then(response => {
+		const htmlParaser = response.data;
 		const $ = cheerio.load(htmlParaser)
 		//繰り返し
 		$('.animate_item', htmlParaser).each(function () {
