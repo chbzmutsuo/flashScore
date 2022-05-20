@@ -5,10 +5,9 @@ export default function spPc(req, res) {
 
 	const options = {
 		args: ['--no-sandbox', '-disable-setuid-sandbox'],
-		headless: false,  // 動作確認するためheadlessモードにしない
-		slowMo: 30  // 動作確認しやすいようにpuppeteerの操作を遅延させる
+		// headless: false,
+		// slowMo: 30
 	};
-	const browser = await puppeteer.launch(options);
 
 	(async () => {
 		const browser = await puppeteer.launch(options)
