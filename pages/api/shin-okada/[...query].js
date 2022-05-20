@@ -43,6 +43,11 @@ export default async function Index(req, res) {
 					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
 					return data
 					break;
+				case 'surugaya':
+					data = await scrapeSurugaya(searchWord);
+					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
+					return data
+					break;
 				case 'rakuten':
 					data = await scrapeRakuten(searchWord);
 					console.log(`${key}: ${data.data.length}件のデータ`)   //////////
@@ -375,6 +380,29 @@ const scrapeYahoo = async (searchWord) => {
 			price = Number(price.replace('円', "").replace(',', ""))
 			imageUrl = $(this).find('img', '._2Qs-G7hnS2-2').attr('src')
 			items.push({ title, price, href, imageUrl })
+		})
+
+		let removeNoPrice = removeNoPriceItem(items)
+		return { url: URL, data: sortByPrice(removeNoPrice) }
+	}).catch(error => { console.error(error); return { msg: error } })
+}
+const scrapeSurugaya = async (searchWord) => {
+	const URL = `https://www.suruga-ya.jp/search?category=&search_word=${encodeURI(searchWord)}&adult_s=2&is_marketplace=0&rankBy=price%3Aascending`
+
+	let items = [];
+	return fetch(URL).then(response => response.text()).then(data => {
+		const htmlParaser = data;
+		const $ = cheerio.load(htmlParaser)
+		//繰り返し
+		$('.item', htmlParaser).each(function () {
+			let title, href, price = 'no price set', imageUrl;
+			title = $(this).find('p.title').text();
+			href = $(this).find('a').attr('href');
+			price = $(this).find('.price_teika').text()
+			price = Number(price.replace('￥', "").replace(',', "")).replace('税込', "")
+			items.push({ title, price, href, imageUrl })
+
+			console.log({ items })   //////////
 		})
 
 		let removeNoPrice = removeNoPriceItem(items)
