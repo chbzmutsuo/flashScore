@@ -1,16 +1,21 @@
 export default function spPc(req, res) {
 
 	const puppeteer = require('puppeteer');
+	const URL = req.body.url;
+
+	const options = {
+		args: ['--no-sandbox', '-disable-setuid-sandbox'],
+		headless: false,  // 動作確認するためheadlessモードにしない
+		slowMo: 30  // 動作確認しやすいようにpuppeteerの操作を遅延させる
+	};
+	const browser = await puppeteer.launch(options);
 
 	(async () => {
-		const browser = await puppeteer.launch({
-			headless: false,  // 動作確認するためheadlessモードにしない
-			slowMo: 30  // 動作確認しやすいようにpuppeteerの操作を遅延させる
-		})
+		const browser = await puppeteer.launch(options)
 
 		const page = await browser.newPage()
 
-		await page.goto('https://www.amazon.co.jp/ref=nav_logo', { waitUntil: 'networkidle2', });
+		await page.goto(URL, { waitUntil: 'networkidle2', });
 		const pcPicPath = await picSite('sp', page);
 
 		/**スマホ */
