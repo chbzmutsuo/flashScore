@@ -387,7 +387,8 @@ const scrapeYahoo = async (searchWord) => {
 	}).catch(error => { console.error(error); return { msg: error } })
 }
 const scrapeSurugaya = async (searchWord) => {
-	const URL = `https://www.suruga-ya.jp/search?category=&search_word=${encodeURI(searchWord)}&adult_s=2&is_marketplace=0&rankBy=price%3Aascending`
+	const URL = `https://www.suruga-ya.jp/search?category=&search_word=${encodeURI(searchWord)}&adult_s=2&is_marketplace=0&rankBy=price%3Aascending&restrict[]=sale_classified=%E6%96%B0%E5%93%81`
+
 
 	let items = [];
 	return fetch(URL).then(response => response.text()).then(data => {
@@ -398,18 +399,21 @@ const scrapeSurugaya = async (searchWord) => {
 			let title, href, price = 'no price set', imageUrl;
 			title = $(this).find('p.title').text();
 			href = $(this).find('a').attr('href');
-			price = $(this).find('.price_teika').text()
-			price = Number(price.replace('￥', "").replace(',', "")).replace('税込', "")
+			$(this).find('.price_teika').each(function () {
+				let replacedText = $(this).text().replace(/\t|\r|\n|\s/g, "");
+				replacedText.includes("新品") ? price = Number(replacedText.replace(/\D/g, "")) : '';
+			})
+			// price = price.replace(/\t|\r|\n|\s/g, "");
+			// price = price.replace(/¥|,|\n|\(税込\)|代引・銀行・コンビニ|\s|/g, text => { return text })
+			console.log(price)   //////////
+			// price = Number(price.replace('￥', "").replace(',', "").replace('税込', ""))
 			items.push({ title, price, href, imageUrl })
-
-			console.log({ items })   //////////
 		})
 
 		let removeNoPrice = removeNoPriceItem(items)
 		return { url: URL, data: sortByPrice(removeNoPrice) }
 	}).catch(error => { console.error(error); return { msg: error } })
 }
-
 
 
 
