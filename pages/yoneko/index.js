@@ -13,6 +13,8 @@ export default function Yoneko() {
 	useEffect(() => {
 		fire()
 	}, []);
+
+
 	function fire() {
 		setfireWorks(true)
 		setTimeout(() => {

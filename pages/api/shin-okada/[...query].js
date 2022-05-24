@@ -131,85 +131,85 @@ function removeNoPriceItem(items) {
 
 
 
-/**最安値ドットコム */
-const scrapeSaiyasune = async (searchWord) => {
-	// const URL = `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
+// /**最安値ドットコム */
+// const scrapeSaiyasune = async (searchWord) => {
+// 	// const URL = `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
 
-	// return fetch(URL).then(response => response.text()).then(data => {
-	// 	let items = [];
-	// 	const htmlParaser = data;
-	// 	const $ = cheerio.load(htmlParaser)
-	// 	//繰り返し
+// 	// return fetch(URL).then(response => response.text()).then(data => {
+// 	// 	let items = [];
+// 	// 	const htmlParaser = data;
+// 	// 	const $ = cheerio.load(htmlParaser)
+// 	// 	//繰り返し
 
-	// 	return new Promise((resolve, reject) => {
-	// 		const itemCount = $('.p_sc17', htmlParaser).length;
-	// 		$('.p_sc17', htmlParaser).each(async function () {
-	// 			let title, href, price, imageUrl;
-	// 			title = $(this).find('.p_sc22').text()
-	// 			href = $(this).find('a').attr('href')
-	// 			href = `https://www.saiyasune.com/${href}`
-	// 			price = await getPriceFromEachItemPage(href);
-	// 			items.push({ title, price, href, imageUrl })
-
-
-	// 			// 個別商品ページに飛ぶ
-	// 			async function getPriceFromEachItemPage(href) {
-	// 				return fetch(href).then(response => response.text()).then(data => {
-	// 					const eachHtml = data
-	// 					const $ = cheerio.load(eachHtml)
-	// 					let price = $('#p_dt25').text();
-	// 					price = price.replace("¥", "").replace(",", "")
-	// 					return price
-	// 				})
-	// 			}
-	// 			if (items.length === itemCount) {
-	// 				resolve('test');
-	// 			}
-	// 		})
-	// 	}).then(result => {
-	// 		console.log(result)   //////////
-	// 		let removeNoPrice = removeNoPriceItem(items)
-	// 		return { url: URL, data: sortByPrice(removeNoPrice) }
-	// 	})
-
-	// })
-	// 	.catch(error => { console.error(error); return { msg: error } })
-	let items = [];
+// 	// 	return new Promise((resolve, reject) => {
+// 	// 		const itemCount = $('.p_sc17', htmlParaser).length;
+// 	// 		$('.p_sc17', htmlParaser).each(async function () {
+// 	// 			let title, href, price, imageUrl;
+// 	// 			title = $(this).find('.p_sc22').text()
+// 	// 			href = $(this).find('a').attr('href')
+// 	// 			href = `https://www.saiyasune.com/${href}`
+// 	// 			price = await getPriceFromEachItemPage(href);
+// 	// 			items.push({ title, price, href, imageUrl })
 
 
+// 	// 			// 個別商品ページに飛ぶ
+// 	// 			async function getPriceFromEachItemPage(href) {
+// 	// 				return fetch(href).then(response => response.text()).then(data => {
+// 	// 					const eachHtml = data
+// 	// 					const $ = cheerio.load(eachHtml)
+// 	// 					let price = $('#p_dt25').text();
+// 	// 					price = price.replace("¥", "").replace(",", "")
+// 	// 					return price
+// 	// 				})
+// 	// 			}
+// 	// 			if (items.length === itemCount) {
+// 	// 				resolve('test');
+// 	// 			}
+// 	// 		})
+// 	// 	}).then(result => {
+// 	// 		console.log(result)   //////////
+// 	// 		let removeNoPrice = removeNoPriceItem(items)
+// 	// 		return { url: URL, data: sortByPrice(removeNoPrice) }
+// 	// 	})
 
-	const fetchOptions = {
-		headers: {
-			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36',
-			Referer: `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
-		}
-	}
+// 	// })
+// 	// 	.catch(error => { console.error(error); return { msg: error } })
+// 	let items = [];
 
 
-	const URL = `https://www.saiyasune.com/J${encodeURI(searchWord)}.html`
-	return fetch(URL, fetchOptions).then(response => response.text()).then(data => {
-		const eachHtml = data
-		console.log(eachHtml)   //////////
-		let title, href, price, imageUrl;
-		const $ = cheerio.load(eachHtml)
 
-		$('.p_dt136').each(function () {
-			if (title === undefined) {
-				title = $(this).text();
-			}
-		})
-		href = URL
-		price = $('#p_dt25').text();
-		price = price.replace("¥", "").replace(",", "")
-		items.push({ title, href, price })
-		console.log({ items })   //////////
+// 	const fetchOptions = {
+// 		headers: {
+// 			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36',
+// 			Referer: `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
+// 		}
+// 	}
 
-		let removeNoPrice = removeNoPriceItem(items)
-		return { url: URL, data: sortByPrice(removeNoPrice) }
-	})
-		.catch(error => { console.error(error); return { msg: 'error' } })
 
-}
+// 	const URL = `https://www.saiyasune.com/J${encodeURI(searchWord)}.html`
+// 	return fetch(URL, fetchOptions).then(response => response.text()).then(data => {
+// 		const eachHtml = data
+// 		console.log(eachHtml)   //////////
+// 		let title, href, price, imageUrl;
+// 		const $ = cheerio.load(eachHtml)
+
+// 		$('.p_dt136').each(function () {
+// 			if (title === undefined) {
+// 				title = $(this).text();
+// 			}
+// 		})
+// 		href = URL
+// 		price = $('#p_dt25').text();
+// 		price = price.replace("¥", "").replace(",", "")
+// 		items.push({ title, href, price })
+// 		console.log({ items })   //////////
+
+// 		let removeNoPrice = removeNoPriceItem(items)
+// 		return { url: URL, data: sortByPrice(removeNoPrice) }
+// 	})
+// 		.catch(error => { console.error(error); return { msg: 'error' } })
+
+// }
 
 
 
@@ -308,7 +308,7 @@ const scrapeYamada = async (searchWord) => {
 /**楽天を検索 */
 const scrapeRakuten = async (searchWord) => {
 
-	const URL = `https://search.rakuten.co.jp/search/mall/${encodeURI(searchWord)}/?s=11`
+	const URL = `https://search.rakuten.co.jp/search/mall/${encodeURI(searchWord)}/?s=11&used=0`
 
 	let items = [];
 	return fetch(URL).then(response => response.text()).then(data => {
@@ -365,7 +365,7 @@ const scrapeAmazon = async (searchWord) => {
 
 /**yahooを検索 */
 const scrapeYahoo = async (searchWord) => {
-	const URL = `https://shopping.yahoo.co.jp/search?p=${encodeURI(searchWord)}&tab_ex=commerce&area=13&X=2&sc_i=shp_pc_search_sort_sortitem`
+	const URL = `https://shopping.yahoo.co.jp/search?X=2&p=${encodeURI(searchWord)}&tab_ex=commerce&sc_i=shp_pc_search_nrwtr_item&area=13&used=2&b=1`
 
 	let items = [];
 	return fetch(URL).then(response => response.text()).then(data => {
@@ -387,8 +387,11 @@ const scrapeYahoo = async (searchWord) => {
 	}).catch(error => { console.error(error); return { msg: error } })
 }
 const scrapeSurugaya = async (searchWord) => {
-	const URL = `https://www.suruga-ya.jp/search?category=&search_word=${encodeURI(searchWord)}&adult_s=2&is_marketplace=0&rankBy=price%3Aascending&restrict[]=sale_classified=%E6%96%B0%E5%93%81`
+	const URL = `https://www.suruga-ya.jp/search?category=&search_word=${encodeURI(searchWord)}&search_word_root=${encodeURI(searchWord)}&category1=0&category2=0&category3=0&sale_classified=1&title=&year1=&month1=&day1=&year2=&month2=&day2=&adult_s&inStock=On&top_detail_search_bookmark=1&cookie=true&tenpo_code=`
 
+
+
+	console.log(URL)   //////////
 
 	let items = [];
 	return fetch(URL).then(response => response.text()).then(data => {
@@ -401,7 +404,7 @@ const scrapeSurugaya = async (searchWord) => {
 			href = $(this).find('a').attr('href');
 			$(this).find('.price_teika').each(function () {
 				let replacedText = $(this).text().replace(/\t|\r|\n|\s/g, "");
-				replacedText.includes("新品") ? price = Number(replacedText.replace(/\D/g, "")) : '';
+				replacedText.includes("新品") || replacedText.includes("予約") || replacedText.includes("定価") ? price = Number(replacedText.replace(/\D/g, "")) : '';
 			})
 			// price = price.replace(/\t|\r|\n|\s/g, "");
 			// price = price.replace(/¥|,|\n|\(税込\)|代引・銀行・コンビニ|\s|/g, text => { return text })
