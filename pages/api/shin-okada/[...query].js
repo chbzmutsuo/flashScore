@@ -404,7 +404,7 @@ const scrapeSurugaya = async (searchWord) => {
 			href = $(this).find('a').attr('href');
 			$(this).find('.price_teika').each(function () {
 				let replacedText = $(this).text().replace(/\t|\r|\n|\s/g, "");
-				replacedText.includes("新品") || replacedText.includes("予約") || replacedText.includes("定価") ? price = Number(replacedText.replace(/\D/g, "")) : '';
+				replacedText.includes("新品") ?? replacedText.includes("予約") ?? replacedText.includes("定価") ? price = Number(replacedText.replace(/\D/g, "")) : '';
 			})
 			// price = price.replace(/\t|\r|\n|\s/g, "");
 			// price = price.replace(/¥|,|\n|\(税込\)|代引・銀行・コンビニ|\s|/g, text => { return text })
