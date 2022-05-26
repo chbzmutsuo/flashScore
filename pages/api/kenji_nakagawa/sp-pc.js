@@ -10,9 +10,6 @@ export default function spPc(req, res) {
 	};
 
 	const imageToBase64 = require('image-to-base64');
-	//or
-	//import imageToBase64 from 'image-to-base64/browser';
-
 
 
 	(async () => {
@@ -24,23 +21,20 @@ export default function spPc(req, res) {
 		const pcPicBASE64 = await picSite('sp', page);
 
 		/**スマホ */
-		const page2 = await browser.newPage()
-		await page2.goto(URL, { waitUntil: 'networkidle2', });
-		await page2.emulate(puppeteer.devices['iPhone 5'])
-		const spPicBASE64 = await picSite('pc', page2);
+		// const page2 = await browser.newPage()
+		// await page2.goto(URL, { waitUntil: 'networkidle2', });
+		await page.emulate(puppeteer.devices['iPhone 5'])
+		const spPicBASE64 = await picSite('pc', page);
 
-		await page.waitForTimeout(5000);
+		// await page.waitForTimeout(5000);
 		// const url = await page.url()
-		console.log(page.url(), page2.url())   //////////
-
-
-
-
-
+		// console.log(page.url(), page.url())   //////////
 
 
 		// const divCount = await getHtml();
 		await browser.close()
+
+		return { pcPicBASE64, spPicBASE64 }
 
 
 
@@ -75,7 +69,7 @@ export default function spPc(req, res) {
 		// 	return { h1: h1.length, h2: h2.length, h3: h3.length }
 		// }
 
-		return { pcPicBASE64, spPicBASE64 }
+
 
 	})().then(result => {
 		return res.json({ result })
