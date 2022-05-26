@@ -3,11 +3,18 @@ export default function spPc(req, res) {
 	const puppeteer = require('puppeteer');
 	const URL = req.body.url;
 
+
+
 	const options = {
 		args: ['--no-sandbox', '-disable-setuid-sandbox'],
-		headless: false,
-		slowMo: 30
+		// headless: false,
+		// slowMo: 30
 	};
+
+	if (req.body.local) {
+		options['headless'] = false;
+		options['slowMo'] = 30
+	}
 
 	const imageToBase64 = require('image-to-base64');
 
