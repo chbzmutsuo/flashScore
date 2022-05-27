@@ -333,36 +333,103 @@ const scrapeRakuten = async (searchWord) => {
 }
 
 /**Amazonを検索 */
+/**これだけはpupteerにて */
 const scrapeAmazon = async (searchWord) => {
 	const URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=206W0TL0OM2N5&qid=1651031081&sprefix=%E7%84%A1%E5%8D%B0%2Caps%2C233&ref=sr_st_price-asc-rank`
-
 	let items = [];
-	return await axios(URL).then(response => {
-		const htmlParaser = response.data;
-		const $ = cheerio.load(htmlParaser)
-		//繰り返し
-		$('.a-section.a-spacing-base', htmlParaser).each(function () {
-			let title, href, price = 'no price set', imageUrl;
-			title = $(this).find('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal').text();
 
-			href = $(this).find('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal').attr('href');
-			href = `https://www.amazon.co.jp/${href}`
+	const options = {
+		args: ['--no-sandbox', '-disable-setuid-sandbox'],
+		// headless: false,
+		// slowMo: 30
+	};
 
-			price = $(this).find('span.a-price-whole').text()
-			price = Number(price.replace('￥', "").replace(',', ""))
-			imageUrl = $(this).find('img', '.s-img').attr('src')
+	const puppeteer = require('puppeteer');
+	const browser = await puppeteer.launch(options)
 
-			items.push({ title, price, href, imageUrl })
-			console.log({ items })   //////////
-		})
+	const page = await browser.newPage()
+	await page.goto(URL, { waitUntil: 'networkidle2', });
+	const itemList = await page.$$('.a-section.a-spacing-base');
+
+	for (let i = 0; i < itemList.length; i++) {
+		let item = itemList[i]
+		let title, href, price = 'no price set', imageUrl;
+		let atag = await item.$('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
+		title = await getProperty(atag, "textContent")
+		href = await getProperty(atag, 'href')
+
+		price = await item.$('span.a-price-whole')
+		price = await getProperty(price, "textContent")
+		price = Number(price.replace('￥', "").replace(',', ""))
+		items.push({ title, price, href, imageUrl })
+		if (i === itemList.length - 1) {
+			let removeNoPrice = removeNoPriceItem(items)
+			console.log(removeNoPrice)   //////////
+			return { url: URL, data: sortByPrice(removeNoPrice) }
+		}
+	}
+
+	// itemList.forEach(async item => {
+	// 	let title, href, price = 'no price set', imageUrl;
+	// 	let atag = await item.$('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
+	// 	title = await getProperty(atag, "textContent")
+	// 	href = await getProperty(atag, 'href')
+
+	// 	price = await item.$('span.a-price-whole')
+	// 	price = await getProperty(price, "textContent")
+	// 	price = Number(price.replace('￥', "").replace(',', ""))
+	// 	items.push({ title, price, href, imageUrl })
+	// })
+	// console.log(items)   //////////
 
 
 
 
 
-		let removeNoPrice = removeNoPriceItem(items)
-		return { url: URL, data: sortByPrice(removeNoPrice) }
-	}).catch(error => { console.error(error); return { msg: error } })
+
+
+
+
+
+	async function getProperty(elem, property) {
+		let result;
+		let jsHadnle = await elem.getProperty(property);
+		result = await jsHadnle.jsonValue();
+		return result;
+	}
+
+
+
+
+
+
+	// ---------------------------------------------
+
+
+
+	// return await axios(URL).then(response => {
+	// 	const htmlParaser = response.data;
+	// 	const $ = cheerio.load(htmlParaser)
+	// 	//繰り返し
+	// 	$('.a-section.a-spacing-base', htmlParaser).each(function () {
+	// 		let title, href, price = 'no price set', imageUrl;
+	// 		title = $(this).find('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal').text();
+
+	// 		href = $(this).find('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal').attr('href');
+	// 		href = `https://www.amazon.co.jp/${href}`
+
+	// 		price = $(this).find('span.a-price-whole').text()
+	// 		price = Number(price.replace('￥', "").replace(',', ""))
+	// 		imageUrl = $(this).find('img', '.s-img').attr('src')
+
+	// 		items.push({ title, price, href, imageUrl })
+	// 		console.log({ items })   //////////
+	// 	})
+
+
+	// 	let removeNoPrice = removeNoPriceItem(items)
+	// 	return { url: URL, data: sortByPrice(removeNoPrice) }
+	// }).catch(error => { console.error(error); return { msg: error } })
 }
 
 

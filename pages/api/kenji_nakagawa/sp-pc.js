@@ -1,5 +1,7 @@
 export default function spPc(req, res) {
 
+
+
 	const puppeteer = require('puppeteer');
 	const URL = req.body.url;
 
@@ -13,7 +15,7 @@ export default function spPc(req, res) {
 
 	if (req.body.local) {
 		options['headless'] = false;
-		options['slowMo'] = 30
+		options['slowMo'] = 50
 	}
 
 	const imageToBase64 = require('image-to-base64');
