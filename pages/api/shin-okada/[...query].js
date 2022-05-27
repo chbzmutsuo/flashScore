@@ -261,8 +261,9 @@ const scrapeAmazon = async (searchWord) => {
 
 
 
-		let removeNoPrice = removeNoPriceItem(items)
-		return { url: URL, data: sortByPrice(removeNoPrice) }
+		// let removeNoPrice = removeNoPriceItem(items)
+		// return { url: URL, data: sortByPrice(removeNoPrice) }
+		return { url: URL, data: items }
 	}).catch(error => { console.error(error); return { msg: error } })
 }
 
