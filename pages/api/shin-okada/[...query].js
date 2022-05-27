@@ -340,8 +340,8 @@ const scrapeAmazon = async (searchWord) => {
 
 	const options = {
 		args: ['--no-sandbox', '-disable-setuid-sandbox'],
-		// headless: false,
-		// slowMo: 30
+		headless: false,
+		slowMo: 30
 	};
 
 	const puppeteer = require('puppeteer');
@@ -349,6 +349,9 @@ const scrapeAmazon = async (searchWord) => {
 
 	const page = await browser.newPage()
 	await page.goto(URL, { waitUntil: 'networkidle2', });
+
+
+
 	const itemList = await page.$$('.a-section.a-spacing-base');
 	for (let i = 0; i < itemList.length; i++) {
 		let item = itemList[i]
@@ -392,10 +395,15 @@ const scrapeAmazon = async (searchWord) => {
 
 
 	async function getProperty(elem, property) {
-		let result;
-		let jsHadnle = await elem.getProperty(property);
-		result = await jsHadnle.jsonValue();
-		return result;
+		try {
+			let result;
+			let jsHadnle = await elem.getProperty(property);
+			result = await jsHadnle.jsonValue();
+			return result;
+
+		} catch (error) {
+			return 'element is null'
+		}
 	}
 
 
