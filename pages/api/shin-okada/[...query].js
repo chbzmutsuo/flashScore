@@ -248,10 +248,12 @@ const scrapeAmazon = async (searchWord) => {
 			href = $(this).find('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal').attr('href');
 			href = `https://www.amazon.co.jp/${href}`
 			price = $(this).find('span.a-price-whole').text()
-			price = Number(price.replace('￥', "").replace(',', ""))
+			console.log({ price })   //////////
+			price = price.replace('￥', "").replace(',', "")
 			imageUrl = $(this).find('img', '.s-img').attr('src')
 
-			items.push({ title, price, href, imageUrl })
+			items.push({ title, price })
+			console.log({ URL })   //////////
 			console.log({ items })   //////////
 		})
 
