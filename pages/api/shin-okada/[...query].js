@@ -114,86 +114,6 @@ export default async function Index(req, res) {
 }
 
 
-// /**最安値ドットコム */
-// const scrapeSaiyasune = async (searchWord) => {
-// 	// const URL = `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
-
-// 	// return fetch(URL).then(response => response.text()).then(data => {
-// 	// 	let items = [];
-// 	// 	const htmlParaser = data;
-// 	// 	const $ = cheerio.load(htmlParaser)
-// 	// 	//繰り返し
-
-// 	// 	return new Promise((resolve, reject) => {
-// 	// 		const itemCount = $('.p_sc17', htmlParaser).length;
-// 	// 		$('.p_sc17', htmlParaser).each(async function () {
-// 	// 			let title, href, price, imageUrl;
-// 	// 			title = $(this).find('.p_sc22').text()
-// 	// 			href = $(this).find('a').attr('href')
-// 	// 			href = `https://www.saiyasune.com/${href}`
-// 	// 			price = await getPriceFromEachItemPage(href);
-// 	// 			items.push({ title, price, href, imageUrl })
-
-
-// 	// 			// 個別商品ページに飛ぶ
-// 	// 			async function getPriceFromEachItemPage(href) {
-// 	// 				return fetch(href).then(response => response.text()).then(data => {
-// 	// 					const eachHtml = data
-// 	// 					const $ = cheerio.load(eachHtml)
-// 	// 					let price = $('#p_dt25').text();
-// 	// 					price = price.replace("¥", "").replace(",", "")
-// 	// 					return price
-// 	// 				})
-// 	// 			}
-// 	// 			if (items.length === itemCount) {
-// 	// 				resolve('test');
-// 	// 			}
-// 	// 		})
-// 	// 	}).then(result => {
-// 	// 		console.log(result)   //////////
-// 	// 		let removeNoPrice = removeNoPriceItem(items)
-// 	// 		return { url: URL, data: sortByPrice(removeNoPrice) }
-// 	// 	})
-
-// 	// })
-// 	// 	.catch(error => { console.error(error); return { msg: error } })
-// 	let items = [];
-
-
-
-// 	const fetchOptions = {
-// 		headers: {
-// 			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36',
-// 			Referer: `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
-// 		}
-// 	}
-
-
-// 	const URL = `https://www.saiyasune.com/J${encodeURI(searchWord)}.html`
-// 	return fetch(URL, fetchOptions).then(response => response.text()).then(data => {
-// 		const eachHtml = data
-// 		console.log(eachHtml)   //////////
-// 		let title, href, price, imageUrl;
-// 		const $ = cheerio.load(eachHtml)
-
-// 		$('.p_dt136').each(function () {
-// 			if (title === undefined) {
-// 				title = $(this).text();
-// 			}
-// 		})
-// 		href = URL
-// 		price = $('#p_dt25').text();
-// 		price = price.replace("¥", "").replace(",", "")
-// 		items.push({ title, href, price })
-// 		console.log({ items })   //////////
-
-// 		let removeNoPrice = removeNoPriceItem(items)
-// 		return { url: URL, data: sortByPrice(removeNoPrice) }
-// 	})
-// 		.catch(error => { console.error(error); return { msg: 'error' } })
-
-// }
-
 
 
 /**ホビーストック */
@@ -319,69 +239,90 @@ const scrapeRakuten = async (searchWord) => {
 /**これだけはpupteerにて */
 const scrapeAmazon = async (searchWord) => {
 	// const URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=206W0TL0OM2N5&qid=1651031081&sprefix=%E7%84%A1%E5%8D%B0%2Caps%2C233&ref=sr_st_price-asc-rank`
-
 	const URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=3JW6U8Z89UAC3&sprefix=${encodeURI(searchWord)}%2Caps%2C454&ref=nb_sb_noss`
 	let items = [];
-
-	const options = {
-		args: ['--no-sandbox', '-disable-setuid-sandbox'],
-		// headless: false,
-		// slowMo: 30
-	};
-
-	const puppeteer = require('puppeteer');
-	const browser = await puppeteer.launch(options)
-
-	const page = await browser.newPage()
-	await page.goto(URL, { waitUntil: 'networkidle2', });
-
-
-	const itemList = await page.$$('.a-section.a-spacing-base');
-	if (itemList.length === 0) {
-		console.log('例外処理')   //////////
-
-		const prices = await page.$$('.a-price-whole');
-		for (let i = 0; i < prices.length; i++) {
-			const priceEl = prices[i]
+	return await axios.get(URL).then(response => {
+		const htmlParaser = response.data;
+		const $ = cheerio.load(htmlParaser)
+		//繰り返し
+		$('.a-section.a-spacing-base', htmlParaser).each(function () {
 			let title, href, price = 'no price set', imageUrl;
-			price = await getProp(priceEl, "textContent")
-			price = price.replace('￥', "").replace(',', "").replace("¥", "")/////////
+			title = $(this).find('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal').text();
+
+			href = $(this).find('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal').attr('href');
+			href = `https://www.amazon.co.jp/${href}`
+
+			price = $(this).find('span.a-price-whole').text()
+			price = Number(price.replace('￥', "").replace(',', ""))
+			imageUrl = $(this).find('img', '.s-img').attr('src')
+
 			items.push({ title, price, href, imageUrl })
-			// console.log('no Data')   //////////
-			if (i === prices.length - 1) {
-				console.log(items)   //////////
-				const removeNoPrice = removeNoPriceItem(items)
-				browser.close()
-				return { url: URL, data: sortByPrice(removeNoPrice) }
-			}
+		})
+		let removeNoPrice = removeNoPriceItem(items)
+		return { url: URL, data: sortByPrice(removeNoPrice) }
+	}).catch(error => { console.error(error); return { msg: error } })
 
-		}
+	// const options = {
+	// 	args: ['--no-sandbox', '-disable-setuid-sandbox'],
+	// 	// headless: false,
+	// 	// slowMo: 30
+	// };
 
-		if (prices.length === 0) {
-			browser.close()
-			return { url: URL, data: [], noData: true }
-		}
+	// const puppeteer = require('puppeteer');
+	// const browser = await puppeteer.launch(options)
 
-	} else {
-		console.log('通常処理')   //////////
-		for (let i = 0; i < itemList.length; i++) {
-			let item = itemList[i]
-			let title, href, price = 'no price set', imageUrl;
-			let atag = await item.$('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
-			title = await getProp(atag, "textContent")
-			href = await getProp(atag, 'href')
-			price = await item.$('span.a-price-whole')
-			price = await getProp(price, "textContent")
-			price = price.replace('￥', "").replace(',', "").replace("¥", "")
-			items.push({ title, price, href, imageUrl })
-			if (i === itemList.length - 1) {
-				console.log(items)   //////////
-				const removeNoPrice = removeNoPriceItem(items)
-				browser.close()
-				return { url: URL, data: sortByPrice(removeNoPrice) }
-			}
-		}
-	}
+	// const page = await browser.newPage()
+	// await page.goto(URL, { waitUntil: 'networkidle2', });
+
+
+	// const itemList = await page.$$('.a-section.a-spacing-base');
+	// if (itemList.length === 0) {
+	// 	console.log('例外処理')   //////////
+
+	// 	const prices = await page.$$('.a-price-whole');
+	// 	for (let i = 0; i < prices.length; i++) {
+	// 		const priceEl = prices[i]
+	// 		let title, href, price = 'no price set', imageUrl;
+	// 		price = await getProp(priceEl, "textContent")
+	// 		price = price.replace('￥', "").replace(',', "").replace("¥", "")/////////
+	// 		items.push({ title, price, href, imageUrl })
+	// 		// console.log('no Data')   //////////
+	// 		if (i === prices.length - 1) {
+	// 			console.log(items)   //////////
+	// 			const removeNoPrice = removeNoPriceItem(items)
+	// 			browser.close()
+	// 			return { url: URL, data: sortByPrice(removeNoPrice) }
+	// 		}
+
+	// 	}
+
+	// 	if (prices.length === 0) {
+	// 		browser.close()
+	// 		return { url: URL, data: [], noData: true }
+	// 	}
+
+	// } else {
+	// 	console.log('通常処理')   //////////
+	// 	for (let i = 0; i < itemList.length; i++) {
+	// 		let item = itemList[i]
+	// 		let title, href, price = 'no price set', imageUrl;
+	// 		let atag = await item.$('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
+	// 		title = await getProp(atag, "textContent")
+	// 		href = await getProp(atag, 'href')
+	// 		price = await item.$('span.a-price-whole')
+	// 		price = await getProp(price, "textContent")
+	// 		price = price.replace('￥', "").replace(',', "").replace("¥", "")
+	// 		items.push({ title, price, href, imageUrl })
+	// 		if (i === itemList.length - 1) {
+	// 			console.log(items)   //////////
+	// 			const removeNoPrice = removeNoPriceItem(items)
+	// 			browser.close()
+	// 			return { url: URL, data: sortByPrice(removeNoPrice) }
+	// 		}
+	// 	}
+	// }
+
+
 	// itemList.forEach(async item => {
 	// 	let title, href, price = 'no price set', imageUrl;
 	// 	let atag = await item.$('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
