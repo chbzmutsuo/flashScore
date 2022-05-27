@@ -334,11 +334,10 @@ const scrapeAmazon = async (searchWord) => {
 	await page.goto(URL, { waitUntil: 'networkidle2', });
 
 
-
-
 	const itemList = await page.$$('.a-section.a-spacing-base');
 	if (itemList.length === 0) {
 		console.log('例外処理')   //////////
+
 		const prices = await page.$$('.a-price-whole');
 		for (let i = 0; i < prices.length; i++) {
 			const priceEl = prices[i]
@@ -353,7 +352,14 @@ const scrapeAmazon = async (searchWord) => {
 				browser.close()
 				return { url: URL, data: sortByPrice(removeNoPrice) }
 			}
+
 		}
+
+		if (prices.length === 0) {
+			browser.close()
+			return { url: URL, data: [], noData: true }
+		}
+
 	} else {
 		console.log('通常処理')   //////////
 		for (let i = 0; i < itemList.length; i++) {
@@ -394,17 +400,19 @@ const scrapeAmazon = async (searchWord) => {
 
 
 
-
-
 	async function getProp(elem, property) {
 		try {
 			let result;
-			let jsHadnle = await elem.getProperty(property);
-			result = await jsHadnle.jsonValue();
-			return result;
+			if (elem) {
+				let jsHadnle = await elem.getProperty(property);
+				result = await jsHadnle.jsonValue();
+				return result;
+			} else {
+				return 'element is null'
+			}
 		} catch (error) {
 			console.error(error)
-			return 'element is null'
+			return 'error'
 		}
 	}
 
