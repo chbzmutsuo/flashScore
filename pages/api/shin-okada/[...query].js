@@ -318,7 +318,9 @@ const scrapeRakuten = async (searchWord) => {
 /**Amazonを検索 */
 /**これだけはpupteerにて */
 const scrapeAmazon = async (searchWord) => {
-	const URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=206W0TL0OM2N5&qid=1651031081&sprefix=%E7%84%A1%E5%8D%B0%2Caps%2C233&ref=sr_st_price-asc-rank`
+	// const URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=206W0TL0OM2N5&qid=1651031081&sprefix=%E7%84%A1%E5%8D%B0%2Caps%2C233&ref=sr_st_price-asc-rank`
+
+	const URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=3JW6U8Z89UAC3&sprefix=${encodeURI(searchWord)}%2Caps%2C454&ref=nb_sb_noss`
 	let items = [];
 
 	const options = {
