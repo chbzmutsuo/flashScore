@@ -336,32 +336,44 @@ const scrapeAmazon = async (searchWord) => {
 
 
 
-
-
 	const itemList = await page.$$('.a-section.a-spacing-base');
 	if (itemList.length === 0) {
-		console.log('no Data')   //////////
-		return { url: URL, data: [], noData: true }
-	}
-
-	for (let i = 0; i < itemList.length; i++) {
-		let item = itemList[i]
-		let title, href, price = 'no price set', imageUrl;
-		let atag = await item.$('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
-		title = await getProp(atag, "textContent")
-		href = await getProp(atag, 'href')
-		price = await item.$('span.a-price-whole')
-		price = await getProp(price, "textContent")
-		price = price.replace('￥', "").replace(',', "").replace("¥", "")
-		items.push({ title, price, href, imageUrl })
-		if (i === itemList.length - 1) {
-			console.log(items)   //////////
-			const removeNoPrice = removeNoPriceItem(items)
-			browser.close()
-			return { url: URL, data: sortByPrice(removeNoPrice) }
+		console.log('例外処理')   //////////
+		const prices = await page.$$('.a-price-whole');
+		for (let i = 0; i < prices.length; i++) {
+			const priceEl = prices[i]
+			let title, href, price = 'no price set', imageUrl;
+			price = await getProp(priceEl, "textContent")
+			price = price.replace('￥', "").replace(',', "").replace("¥", "")/////////
+			items.push({ title, price, href, imageUrl })
+			// console.log('no Data')   //////////
+			if (i === prices.length - 1) {
+				console.log(items)   //////////
+				const removeNoPrice = removeNoPriceItem(items)
+				browser.close()
+				return { url: URL, data: sortByPrice(removeNoPrice) }
+			}
+		}
+	} else {
+		console.log('通常処理')   //////////
+		for (let i = 0; i < itemList.length; i++) {
+			let item = itemList[i]
+			let title, href, price = 'no price set', imageUrl;
+			let atag = await item.$('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
+			title = await getProp(atag, "textContent")
+			href = await getProp(atag, 'href')
+			price = await item.$('span.a-price-whole')
+			price = await getProp(price, "textContent")
+			price = price.replace('￥', "").replace(',', "").replace("¥", "")
+			items.push({ title, price, href, imageUrl })
+			if (i === itemList.length - 1) {
+				console.log(items)   //////////
+				const removeNoPrice = removeNoPriceItem(items)
+				browser.close()
+				return { url: URL, data: sortByPrice(removeNoPrice) }
+			}
 		}
 	}
-
 	// itemList.forEach(async item => {
 	// 	let title, href, price = 'no price set', imageUrl;
 	// 	let atag = await item.$('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
