@@ -350,7 +350,6 @@ const scrapeAmazon = async (searchWord) => {
 	const page = await browser.newPage()
 	await page.goto(URL, { waitUntil: 'networkidle2', });
 	const itemList = await page.$$('.a-section.a-spacing-base');
-
 	for (let i = 0; i < itemList.length; i++) {
 		let item = itemList[i]
 		let title, href, price = 'no price set', imageUrl;
@@ -364,7 +363,8 @@ const scrapeAmazon = async (searchWord) => {
 		items.push({ title, price, href, imageUrl })
 		if (i === itemList.length - 1) {
 			let removeNoPrice = removeNoPriceItem(items)
-			console.log(removeNoPrice)   //////////
+			// console.log(removeNoPrice)   //////////
+			browser.close()
 			return { url: URL, data: sortByPrice(removeNoPrice) }
 		}
 	}
