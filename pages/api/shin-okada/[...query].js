@@ -5,9 +5,6 @@ import axios from 'axios';
 
 
 
-
-
-
 export default async function Index(req, res) {
 	let items = [];
 	let data;
@@ -216,7 +213,6 @@ const scrapeRakuten = async (searchWord) => {
 	let items = [];
 	return fetch(URL).then(response => response.text()).then(data => {
 		const htmlParaser = data;
-
 		const $ = cheerio.load(htmlParaser)
 		//繰り返し
 		$('.searchresultitem', htmlParaser).each(function () {
@@ -237,130 +233,35 @@ const scrapeRakuten = async (searchWord) => {
 
 /**Amazonを検索 */
 /**これだけはpupteerにて */
+
+/**Amazonを検索 */
 const scrapeAmazon = async (searchWord) => {
-	// const URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=206W0TL0OM2N5&qid=1651031081&sprefix=%E7%84%A1%E5%8D%B0%2Caps%2C233&ref=sr_st_price-asc-rank`
-	const URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=3JW6U8Z89UAC3&sprefix=${encodeURI(searchWord)}%2Caps%2C454&ref=nb_sb_noss`
+	const URL = `https://www.amazon.co.jp/s?k=${encodeURI(searchWord)}&s=price-asc-rank&__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=206W0TL0OM2N5&qid=1651031081&sprefix=%E7%84%A1%E5%8D%B0%2Caps%2C233&ref=sr_st_price-asc-rank`
 	let items = [];
-
-
-	return await axios.get(URL).then(response => {
+	return await axios(URL).then(response => {
 		const htmlParaser = response.data;
 		const $ = cheerio.load(htmlParaser)
 		//繰り返し
 		$('.a-section.a-spacing-base', htmlParaser).each(function () {
 			let title, href, price = 'no price set', imageUrl;
 			title = $(this).find('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal').text();
-
 			href = $(this).find('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal').attr('href');
 			href = `https://www.amazon.co.jp/${href}`
-
 			price = $(this).find('span.a-price-whole').text()
 			price = Number(price.replace('￥', "").replace(',', ""))
 			imageUrl = $(this).find('img', '.s-img').attr('src')
 
 			items.push({ title, price, href, imageUrl })
+			console.log({ items })   //////////
 		})
+
+
+
+
+
 		let removeNoPrice = removeNoPriceItem(items)
 		return { url: URL, data: sortByPrice(removeNoPrice) }
 	}).catch(error => { console.error(error); return { msg: error } })
-
-	// const options = {
-	// 	args: ['--no-sandbox', '-disable-setuid-sandbox'],
-	// 	// headless: false,
-	// 	// slowMo: 30
-	// };
-
-	// const puppeteer = require('puppeteer');
-	// const browser = await puppeteer.launch(options)
-
-	// const page = await browser.newPage()
-	// await page.goto(URL, { waitUntil: 'networkidle2', });
-
-
-	// const itemList = await page.$$('.a-section.a-spacing-base');
-	// if (itemList.length === 0) {
-	// 	console.log('例外処理')   //////////
-
-	// 	const prices = await page.$$('.a-price-whole');
-	// 	for (let i = 0; i < prices.length; i++) {
-	// 		const priceEl = prices[i]
-	// 		let title, href, price = 'no price set', imageUrl;
-	// 		price = await getProp(priceEl, "textContent")
-	// 		price = price.replace('￥', "").replace(',', "").replace("¥", "")/////////
-	// 		items.push({ title, price, href, imageUrl })
-	// 		// console.log('no Data')   //////////
-	// 		if (i === prices.length - 1) {
-	// 			console.log(items)   //////////
-	// 			const removeNoPrice = removeNoPriceItem(items)
-	// 			browser.close()
-	// 			return { url: URL, data: sortByPrice(removeNoPrice) }
-	// 		}
-
-	// 	}
-
-	// 	if (prices.length === 0) {
-	// 		browser.close()
-	// 		return { url: URL, data: [], noData: true }
-	// 	}
-
-	// } else {
-	// 	console.log('通常処理')   //////////
-	// 	for (let i = 0; i < itemList.length; i++) {
-	// 		let item = itemList[i]
-	// 		let title, href, price = 'no price set', imageUrl;
-	// 		let atag = await item.$('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
-	// 		title = await getProp(atag, "textContent")
-	// 		href = await getProp(atag, 'href')
-	// 		price = await item.$('span.a-price-whole')
-	// 		price = await getProp(price, "textContent")
-	// 		price = price.replace('￥', "").replace(',', "").replace("¥", "")
-	// 		items.push({ title, price, href, imageUrl })
-	// 		if (i === itemList.length - 1) {
-	// 			console.log(items)   //////////
-	// 			const removeNoPrice = removeNoPriceItem(items)
-	// 			browser.close()
-	// 			return { url: URL, data: sortByPrice(removeNoPrice) }
-	// 		}
-	// 	}
-	// }
-
-
-	// itemList.forEach(async item => {
-	// 	let title, href, price = 'no price set', imageUrl;
-	// 	let atag = await item.$('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
-	// 	title = await getProperty(atag, "textContent")
-	// 	href = await getProperty(atag, 'href')
-
-	// 	price = await item.$('span.a-price-whole')
-	// 	price = await getProperty(price, "textContent")
-	// 	price = Number(price.replace('￥', "").replace(',', ""))
-	// 	items.push({ title, price, href, imageUrl })
-	// })
-	// console.log(items)   //////////
-
-
-
-
-
-
-
-
-	async function getProp(elem, property) {
-		try {
-			let result;
-			if (elem) {
-				let jsHadnle = await elem.getProperty(property);
-				result = await jsHadnle.jsonValue();
-				return result;
-			} else {
-				return 'element is null'
-			}
-		} catch (error) {
-			console.error(error)
-			return 'error'
-		}
-	}
-
 }
 
 
