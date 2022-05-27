@@ -352,7 +352,7 @@ const scrapeAmazon = async (searchWord) => {
 		href = await getProp(atag, 'href')
 		price = await item.$('span.a-price-whole')
 		price = await getProp(price, "textContent")
-		price = price.replace('￥', "").replace(',', "")
+		price = price.replace('￥', "").replace(',', "").replace("¥", "")
 		items.push({ title, price, href, imageUrl })
 		if (i === itemList.length - 1) {
 			console.log(items)   //////////
