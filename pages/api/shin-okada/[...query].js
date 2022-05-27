@@ -114,23 +114,6 @@ export default async function Index(req, res) {
 }
 
 
-function sortByPrice(items) {
-	return items.sort(
-		function (a, b) {
-			if (a.price < b.price) return -1;
-			if (a.price > b.price) return 1;
-			return 0;
-		}
-	)
-}
-
-function removeNoPriceItem(items) {
-	return items.filter(item => { return item.price > 0 })
-}
-
-
-
-
 // /**最安値ドットコム */
 // const scrapeSaiyasune = async (searchWord) => {
 // 	// const URL = `https://www.saiyasune.com/I1W${encodeURI(searchWord)}.html`
@@ -340,8 +323,8 @@ const scrapeAmazon = async (searchWord) => {
 
 	const options = {
 		args: ['--no-sandbox', '-disable-setuid-sandbox'],
-		headless: false,
-		slowMo: 30
+		// headless: false,
+		// slowMo: 30
 	};
 
 	const puppeteer = require('puppeteer');
@@ -353,19 +336,23 @@ const scrapeAmazon = async (searchWord) => {
 
 
 	const itemList = await page.$$('.a-section.a-spacing-base');
+	if (itemList.length === 0) {
+		console.log('no Data')   //////////
+		return { url: URL, data: [], noData: true }
+	}
+
 	for (let i = 0; i < itemList.length; i++) {
 		let item = itemList[i]
 		let title, href, price = 'no price set', imageUrl;
 		let atag = await item.$('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
-		title = await getProperty(atag, "textContent")
-		href = await getProperty(atag, 'href')
-
+		title = await getProp(atag, "textContent")
+		href = await getProp(atag, 'href')
 		price = await item.$('span.a-price-whole')
-		price = await getProperty(price, "textContent")
+		price = await getProp(price, "textContent")
 		price = Number(price.replace('￥', "").replace(',', ""))
 		items.push({ title, price, href, imageUrl })
 		if (i === itemList.length - 1) {
-			let removeNoPrice = removeNoPriceItem(items)
+			const removeNoPrice = removeNoPriceItem(items)
 			// console.log(removeNoPrice)   //////////
 			browser.close()
 			return { url: URL, data: sortByPrice(removeNoPrice) }
@@ -394,50 +381,18 @@ const scrapeAmazon = async (searchWord) => {
 
 
 
-	async function getProperty(elem, property) {
+	async function getProp(elem, property) {
 		try {
 			let result;
 			let jsHadnle = await elem.getProperty(property);
 			result = await jsHadnle.jsonValue();
 			return result;
-
 		} catch (error) {
+			console.error(error)
 			return 'element is null'
 		}
 	}
 
-
-
-
-
-
-	// ---------------------------------------------
-
-
-
-	// return await axios(URL).then(response => {
-	// 	const htmlParaser = response.data;
-	// 	const $ = cheerio.load(htmlParaser)
-	// 	//繰り返し
-	// 	$('.a-section.a-spacing-base', htmlParaser).each(function () {
-	// 		let title, href, price = 'no price set', imageUrl;
-	// 		title = $(this).find('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal').text();
-
-	// 		href = $(this).find('a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal').attr('href');
-	// 		href = `https://www.amazon.co.jp/${href}`
-
-	// 		price = $(this).find('span.a-price-whole').text()
-	// 		price = Number(price.replace('￥', "").replace(',', ""))
-	// 		imageUrl = $(this).find('img', '.s-img').attr('src')
-
-	// 		items.push({ title, price, href, imageUrl })
-	// 		console.log({ items })   //////////
-	// 	})
-
-
-	// 	let removeNoPrice = removeNoPriceItem(items)
-	// 	return { url: URL, data: sortByPrice(removeNoPrice) }
-	// }).catch(error => { console.error(error); return { msg: error } })
 }
 
 
@@ -514,5 +469,22 @@ function convertCompletStringToPrice(string) {
 
 
 
+
+
+
+
+function sortByPrice(items) {
+	return items.sort(
+		function (a, b) {
+			if (a.price < b.price) return -1;
+			if (a.price > b.price) return 1;
+			return 0;
+		}
+	)
+}
+
+function removeNoPriceItem(items) {
+	return items.filter(item => { return item.price > 0 })
+}
 
 
