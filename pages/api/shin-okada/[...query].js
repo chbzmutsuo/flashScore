@@ -335,6 +335,9 @@ const scrapeAmazon = async (searchWord) => {
 
 
 
+
+
+
 	const itemList = await page.$$('.a-section.a-spacing-base');
 	if (itemList.length === 0) {
 		console.log('no Data')   //////////
@@ -352,8 +355,8 @@ const scrapeAmazon = async (searchWord) => {
 		price = Number(price.replace('￥', "").replace(',', ""))
 		items.push({ title, price, href, imageUrl })
 		if (i === itemList.length - 1) {
+			console.log(items)   //////////
 			const removeNoPrice = removeNoPriceItem(items)
-			// console.log(removeNoPrice)   //////////
 			browser.close()
 			return { url: URL, data: sortByPrice(removeNoPrice) }
 		}
